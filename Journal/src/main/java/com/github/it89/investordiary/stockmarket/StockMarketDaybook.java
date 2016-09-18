@@ -1,7 +1,6 @@
 package com.github.it89.investordiary.stockmarket;
 
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 /**
  * Created by Axel on 17.09.2016.
@@ -34,5 +33,14 @@ public class StockMarketDaybook {
 
     public void addTradeStock(TradeStock tradeStock) {
         tradeStocks.put(tradeStock.getTradeNumber(), tradeStock);
+    }
+
+    @Override
+    public String toString() {
+        return "StockMarketDaybook{" +
+                "assets=" + assets +
+                ", tradeStocks=" + tradeStocks +
+                ", tradeBonds=" + tradeBonds +
+                '}';
     }
 }

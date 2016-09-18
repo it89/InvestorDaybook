@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.it89</groupId>
-    <artifactId>investor-diary</artifactId>
+    <artifactId>investor-daybook</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
@@ -16,6 +16,11 @@
         <dependency>
             <groupId>com.github.it89</groupId>
             <artifactId>journal</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.it89</groupId>
+            <artifactId>backup</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>

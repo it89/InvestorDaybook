@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Currency;
-import java.util.HashSet;
 
 abstract class Trade {
     protected Asset asset;
@@ -16,7 +15,7 @@ abstract class Trade {
     protected long amount;
     protected Currency currency;
     protected BigDecimal volume;
-    protected final HashSet<TradeCommission> commissions = new HashSet<TradeCommission>();
+    protected BigDecimal commission;
 
     protected Trade(String tradeNumber) {
         this.tradeNumber = tradeNumber;
@@ -90,6 +89,14 @@ abstract class Trade {
         this.volume = volume;
     }
 
+    public BigDecimal getCommission() {
+        return commission;
+    }
+
+    public void setCommission(BigDecimal comission) {
+        this.commission = comission;
+    }
+
     @Override
     public String toString() {
         return "Trade{" +
@@ -102,11 +109,8 @@ abstract class Trade {
                 ", amount=" + amount +
                 ", currency=" + currency +
                 ", volume=" + volume +
-                ", commissions=" + commissions +
+                ", commission=" + commission +
                 '}';
     }
 
-    public void AddComission(TradeCommission commission) {
-        commissions.add(commission);
-    }
 }
