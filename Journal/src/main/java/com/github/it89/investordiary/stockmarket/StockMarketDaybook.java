@@ -35,6 +35,10 @@ public class StockMarketDaybook {
         tradeStocks.put(tradeStock.getTradeNumber(), tradeStock);
     }
 
+    public void addTradeBond(TradeBond tradeBond) {
+        tradeBonds.put(tradeBond.getTradeNumber(), tradeBond);
+    }
+
     @Override
     public String toString() {
         return "StockMarketDaybook{" +

@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Currency;
 
-abstract class Trade {
+public abstract class Trade {
     protected Asset asset;
     protected String applicationNumber;
     protected final String tradeNumber;
