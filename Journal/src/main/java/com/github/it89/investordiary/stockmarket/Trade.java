@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Currency;
+import java.util.TreeMap;
 
 public abstract class Trade {
     protected Asset asset;
@@ -16,6 +17,7 @@ public abstract class Trade {
     protected Currency currency;
     protected BigDecimal volume;
     protected BigDecimal commission;
+    protected final TreeMap<String, TradeTag> tradeTags = new TreeMap();
 
     protected Trade(String tradeNumber) {
         this.tradeNumber = tradeNumber;
@@ -97,6 +99,14 @@ public abstract class Trade {
         this.commission = comission;
     }
 
+    public TreeMap<String, TradeTag> getTradeTags() {
+        return tradeTags;
+    }
+
+    public void addTradeTag(TradeTag tradeTag) {
+        tradeTags.put(tradeTag.getTag(), tradeTag);
+    }
+
     @Override
     public String toString() {
         return "Trade{" +
@@ -110,6 +120,7 @@ public abstract class Trade {
                 ", currency=" + currency +
                 ", volume=" + volume +
                 ", commission=" + commission +
+                ", tradeTags=" + tradeTags +
                 '}';
     }
 

@@ -52,6 +52,7 @@ public class TradeBond extends Trade{
                 ", currency=" + currency +
                 ", volume=" + volume +
                 ", commission=" + commission +
+                ", tradeTags=" + tradeTags +
                 ", pricePct=" + pricePct +
                 ", nominal=" + nominal +
                 ", dayCountConvention=" + dayCountConvention +

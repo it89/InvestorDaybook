@@ -25,6 +25,7 @@ public class LoaderXLS {
     private static final int CELL_ASSET_TICKER = 1;
     private static final int CELL_ASSET_CAPTION = 0;
     private static final int CELL_ASSET_ASSET_TYPE = 2;
+    private static final int CELL_ASSET_TAGS = 3;
 
     private static final int CELL_TRADE_TRADE_NUMBER = 3;
     private static final int CELL_TRADE_APPLICATION_NUMBER = 2;
@@ -38,6 +39,7 @@ public class LoaderXLS {
     private static final int CELL_TRADE_DAY_COUNT_CONVENTION = 13;
     private static final int CELL_TRADE_COMMISSION = 14;
     private static final int CELL_TRADE_ASSET_TICKER = 18;
+    private static final int CELL_TRADE_TAGS = 19;
 
     public LoaderXLS(StockMarketDaybook stockMarketDaybook, String filename) {
         this.daybook = stockMarketDaybook;
@@ -65,6 +67,16 @@ public class LoaderXLS {
             Asset asset = new Asset(cell.getStringCellValue());
             asset.setCaption(row.getCell(CELL_ASSET_CAPTION).getStringCellValue());
             asset.setAssetType(AssetType.valueOf(row.getCell(CELL_ASSET_ASSET_TYPE).getStringCellValue()));
+
+            String tags = row.getCell(CELL_ASSET_TAGS).getStringCellValue();
+            for (String tag : tags.split(";")) {
+                TradeTag tradeTag = daybook.getTradeTag(tag);
+                if(tradeTag == null) {
+                    tradeTag = new TradeTag(tag);
+                    daybook.addTradeTag(tradeTag);
+                }
+                asset.addTradeTag(tradeTag);
+            }
 
             daybook.addAsset(asset);
             row = sheet.getRow(++rowNum);
@@ -144,6 +156,16 @@ public class LoaderXLS {
             cell = row.getCell(CELL_TRADE_COMMISSION);
             cell.setCellType(Cell.CELL_TYPE_STRING);
             trade.setCommission(new BigDecimal(cell.getStringCellValue()));
+
+            String tags = row.getCell(CELL_TRADE_TAGS).getStringCellValue();
+            for (String tag : tags.split(";")) {
+                TradeTag tradeTag = daybook.getTradeTag(tag);
+                if(tradeTag == null) {
+                    tradeTag = new TradeTag(tag);
+                    daybook.addTradeTag(tradeTag);
+                }
+                trade.addTradeTag(tradeTag);
+            }
 
             row = sheet.getRow(++rowNum);
         }

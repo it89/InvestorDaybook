@@ -9,6 +9,7 @@ public class Asset implements Comparable<Asset> {
     private final String ticker;
     private String caption;
     private AssetType assetType;
+    private final TreeMap<String, TradeTag> tradeTags = new TreeMap();
 
     public Asset(String ticker) {
         this.ticker = ticker;
@@ -34,13 +35,26 @@ public class Asset implements Comparable<Asset> {
         this.assetType = assetType;
     }
 
+    public TreeMap<String, TradeTag> getTradeTags() {
+        return tradeTags;
+    }
+
     public int compareTo(Asset o) {
         return ticker.compareTo(o.ticker);
     }
 
     @Override
     public String toString() {
-        return String.format("Asset{ticker='%s', caption='%s'}", ticker, caption);
+        return "Asset{" +
+                "ticker='" + ticker + '\'' +
+                ", caption='" + caption + '\'' +
+                ", assetType=" + assetType +
+                ", tradeTags=" + tradeTags +
+                '}';
+    }
+
+    public void addTradeTag(TradeTag tradeTag) {
+        tradeTags.put(tradeTag.getTag(), tradeTag);
     }
 
 }
