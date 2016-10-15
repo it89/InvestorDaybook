@@ -41,6 +41,12 @@ public class LoaderXLS {
     private static final int CELL_TRADE_ASSET_TICKER = 18;
     private static final int CELL_TRADE_TAGS = 19;
 
+    private static final int CELL_CASH_FLOW_DATE = 0;
+    private static final int CELL_CASH_FLOW_VOLUME = 2;
+    private static final int CELL_CASH_FLOW_COMMENT = 3;
+    private static final int CELL_CASH_FLOW_TYPE = 4;
+    private static final int CELL_CASH_FLOW_ASSET_TICKER = 5;
+
     public LoaderXLS(StockMarketDaybook stockMarketDaybook, String filename) {
         this.daybook = stockMarketDaybook;
         this.filename = filename;
@@ -51,6 +57,7 @@ public class LoaderXLS {
 
         loadAsset();
         loadTrade();
+        loadCashFlow();
 
         exelBook.close();
     }
@@ -118,7 +125,7 @@ public class LoaderXLS {
 
                 cell = row.getCell(CELL_TRADE_DAY_COUNT_CONVENTION);
                 cell.setCellType(Cell.CELL_TYPE_STRING);
-                tradeBond.setDayCountConvention(new BigDecimal(cell.getStringCellValue()));
+                tradeBond.setAccumulatedCouponYield(new BigDecimal(cell.getStringCellValue()));
             }
             trade.setAsset(asset);
 
@@ -169,6 +176,56 @@ public class LoaderXLS {
 
             row = sheet.getRow(++rowNum);
         }
+    }
 
+    public void loadCashFlow() {
+        HSSFSheet sheet = exelBook.getSheet("CashFlow");
+
+        int rowNum = 1;
+        HSSFRow row = sheet.getRow(rowNum);
+        while(row != null) {
+            CashFlow cashFlow;
+            HSSFCell cell = row.getCell(CELL_CASH_FLOW_COMMENT);
+            if(cell == null)
+                break;
+            String comment = cell.getStringCellValue();
+
+            cell = row.getCell(CELL_CASH_FLOW_TYPE);
+            String typeCode = null;
+            if(cell != null) {
+                typeCode = cell.getStringCellValue();
+            }
+            if(typeCode != null) {
+                CashFlowType cashFlowType = CashFlowType.valueOf(typeCode);
+                if(cashFlowType.isAssetIncome()) {
+                    AssetIncome assetIncome = new AssetIncome();
+                    assetIncome.setAsset(daybook.getAsset(row.getCell(CELL_CASH_FLOW_ASSET_TICKER).getStringCellValue()));
+                    assetIncome.setTax(getCashFlowTaxByComment(comment));
+                    cashFlow = assetIncome;
+                } else {
+                    cashFlow = new CashFlow();
+                }
+
+                cashFlow.setCashFlowType(cashFlowType);
+
+                Date date = row.getCell(CELL_CASH_FLOW_DATE).getDateCellValue();
+                cashFlow.setDate(date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+
+                cell = row.getCell(CELL_CASH_FLOW_VOLUME);
+                cell.setCellType(Cell.CELL_TYPE_STRING);
+                cashFlow.setVolume(new BigDecimal(cell.getStringCellValue()));
+
+                cashFlow.setComment(comment);
+
+                daybook.addCashFlow(cashFlow);
+            }
+            row = sheet.getRow(++rowNum);
+        }
+    }
+
+    public static BigDecimal getCashFlowTaxByComment(String comment) {
+        String taxString = comment.substring(comment.indexOf("налог к удержанию") + "налог к удержанию".length() + 1);
+        taxString = taxString.substring(0, taxString.indexOf(' '));
+        return new BigDecimal(taxString);
     }
 }

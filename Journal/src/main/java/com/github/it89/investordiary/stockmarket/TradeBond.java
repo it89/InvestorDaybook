@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 public class TradeBond extends Trade{
     private BigDecimal pricePct;
     private double nominal;
-    private BigDecimal dayCountConvention;
+    private BigDecimal accumulatedCouponYield;
 
     public TradeBond(String tradeNumber) {
         super(tradeNumber);
@@ -31,12 +31,12 @@ public class TradeBond extends Trade{
         this.nominal = nominal;
     }
 
-    public BigDecimal getDayCountConvention() {
-        return dayCountConvention;
+    public BigDecimal getAccumulatedCouponYield() {
+        return accumulatedCouponYield;
     }
 
-    public void setDayCountConvention(BigDecimal dayCountConvention) {
-        this.dayCountConvention = dayCountConvention;
+    public void setAccumulatedCouponYield(BigDecimal accumulatedCouponYield) {
+        this.accumulatedCouponYield = accumulatedCouponYield;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class TradeBond extends Trade{
                 ", tradeTags=" + tradeTags +
                 ", pricePct=" + pricePct +
                 ", nominal=" + nominal +
-                ", dayCountConvention=" + dayCountConvention +
+                ", accumulatedCouponYield=" + accumulatedCouponYield +
                 '}';
     }
 

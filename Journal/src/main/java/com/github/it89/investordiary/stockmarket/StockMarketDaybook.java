@@ -1,5 +1,6 @@
 package com.github.it89.investordiary.stockmarket;
 
+import java.util.HashSet;
 import java.util.TreeMap;
 
 /**
@@ -10,6 +11,7 @@ public class StockMarketDaybook {
     private final TreeMap<String,TradeStock> tradeStocks = new TreeMap();
     private final TreeMap<String, TradeBond> tradeBonds = new TreeMap();
     private final TreeMap<String, TradeTag> tradeTags = new TreeMap();
+    private final HashSet<CashFlow> cashFlows = new HashSet();
 
     public TreeMap<String, Asset> getAssets() {
         return assets;
@@ -40,6 +42,14 @@ public class StockMarketDaybook {
         tradeBonds.put(tradeBond.getTradeNumber(), tradeBond);
     }
 
+    public HashSet<CashFlow> getCashFlows() {
+        return cashFlows;
+    }
+
+    public void addCashFlow(CashFlow cashFlow) {
+        cashFlows.add(cashFlow);
+    }
+
     public TradeTag getTradeTag(String tag) {
         return tradeTags.get(tag);
     }
@@ -54,6 +64,7 @@ public class StockMarketDaybook {
                 "assets=" + assets +
                 ", tradeStocks=" + tradeStocks +
                 ", tradeBonds=" + tradeBonds +
+                ", cashFlows=" + cashFlows +
                 '}';
     }
 }

@@ -1,8 +1,5 @@
 import com.github.it89.investordiary.backup.xls.LoaderXLS;
-import com.github.it89.investordiary.stockmarket.Asset;
-import com.github.it89.investordiary.stockmarket.StockMarketDaybook;
-import com.github.it89.investordiary.stockmarket.TradeBond;
-import com.github.it89.investordiary.stockmarket.TradeStock;
+import com.github.it89.investordiary.stockmarket.*;
 
 import java.io.IOException;
 import java.util.Map;
@@ -23,12 +20,15 @@ public class Run {
         //testFileXLS = "test.xls";
         LoaderXLS loader = new LoaderXLS(daybook, testFileXLS);
         loader.load();
-        //System.out.println(daybook);
         for (Map.Entry<String, Asset> entry : daybook.getAssets().entrySet())
             System.out.println(entry.getValue());
         for (Map.Entry<String, TradeStock> entry : daybook.getTradeStocks().entrySet())
             System.out.println(entry.getValue());
         for (Map.Entry<String, TradeBond> entry : daybook.getTradeBonds().entrySet())
             System.out.println(entry.getValue());
+        for (CashFlow cashFlow : daybook.getCashFlows()) {
+            System.out.println(cashFlow);
+        }
     }
+
 }
