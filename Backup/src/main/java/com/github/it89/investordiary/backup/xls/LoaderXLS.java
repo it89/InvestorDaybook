@@ -46,6 +46,7 @@ public class LoaderXLS {
     private static final int CELL_CASH_FLOW_COMMENT = 3;
     private static final int CELL_CASH_FLOW_TYPE = 4;
     private static final int CELL_CASH_FLOW_ASSET_TICKER = 5;
+    private static final int CELL_CASH_FLOW_TAGS = 6;
 
     public LoaderXLS(StockMarketDaybook stockMarketDaybook, String filename) {
         this.daybook = stockMarketDaybook;
@@ -216,6 +217,16 @@ public class LoaderXLS {
                 cashFlow.setVolume(new BigDecimal(cell.getStringCellValue()));
 
                 cashFlow.setComment(comment);
+
+                String tags = row.getCell(CELL_CASH_FLOW_TAGS).getStringCellValue();
+                for (String tag : tags.split(";")) {
+                    TradeTag tradeTag = daybook.getTradeTag(tag);
+                    if(tradeTag == null) {
+                        tradeTag = new TradeTag(tag);
+                        daybook.addTradeTag(tradeTag);
+                    }
+                    cashFlow.addTradeTag(tradeTag);
+                }
 
                 daybook.addCashFlow(cashFlow);
             }

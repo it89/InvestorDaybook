@@ -35,6 +35,7 @@ public class AssetIncome extends CashFlow {
                 ", date=" + date +
                 ", volume=" + volume +
                 ", comment='" + comment + '\'' +
+                ", tradeTags=" + tradeTags +
                 ", asset=" + asset +
                 ", tax=" + tax +
                 '}';

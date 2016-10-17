@@ -12,6 +12,7 @@ public class CashFlow {
     protected LocalDate date;
     protected BigDecimal volume;
     protected String comment;
+    protected final TreeMap<String, TradeTag> tradeTags = new TreeMap();
 
     public CashFlowType getCashFlowType() {
         return cashFlowType;
@@ -45,6 +46,14 @@ public class CashFlow {
         this.comment = comment;
     }
 
+    public TreeMap<String, TradeTag> getTradeTags() {
+        return tradeTags;
+    }
+
+    public void addTradeTag(TradeTag tradeTag) {
+        tradeTags.put(tradeTag.getTag(), tradeTag);
+    }
+
     @Override
     public String toString() {
         return "CashFlow{" +
@@ -52,6 +61,7 @@ public class CashFlow {
                 ", date=" + date +
                 ", volume=" + volume +
                 ", comment='" + comment + '\'' +
+                ", tradeTags=" + tradeTags +
                 '}';
     }
 }
