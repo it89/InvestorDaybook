@@ -8,7 +8,10 @@ public enum  CashFlowType {
     INVESTMENT(false),
     COMMISSION_REPO(false),
     DIVIDEND(true),
-    ACCUMULATED_COUPON_YIELD(true);
+    ACCUMULATED_COUPON_YIELD_PAYMENT(true),
+    TRADE(false),
+    COMMISSION_TRADE(false),
+    ACCUMULATED_COUPON_YIELD(false);
 
     private final boolean isAssetIncome;
 
