@@ -70,6 +70,14 @@ public class CashFlowItem {
         return tradeTags;
     }
 
+    public LocalTime getTime() {
+        return time;
+    }
+
+    public void setTime(LocalTime time) {
+        this.time = time;
+    }
+
     @Override
     public String toString() {
         return "CashFlowItem{" +

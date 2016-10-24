@@ -1,4 +1,5 @@
 import com.github.it89.investordiary.backup.xls.LoaderXLS;
+import com.github.it89.investordiary.backup.xls.ReportXLS;
 import com.github.it89.investordiary.stockmarket.*;
 import com.github.it89.investordiary.stockmarket.analysis.CashFlowItem;
 import com.github.it89.investordiary.stockmarket.analysis.CashFlowJournal;
@@ -40,16 +41,11 @@ public class Run {
         for (CashFlow cashFlow : daybook.getCashFlows())
             cashFlowJournal.add(cashFlow);
         CashFlowJournal cashFlowJournalNKNCP = cashFlowJournal.copyByTag(daybook.getTradeTag("NKNCP"));
-
-        for (CashFlowItem cashFlowItem : cashFlowJournalNKNCP.getItems()) {
-            System.out.println(cashFlowItem);
-        }
-
         CashFlowJournal cashFlowJournalSNGSS = cashFlowJournal.copyByTag(daybook.getTradeTag("SNGS-S"));
+        CashFlowJournal cashFlowJournalMGNT = cashFlowJournal.copyByTag(daybook.getTradeTag("MGNT"));
 
-        for (CashFlowItem cashFlowItem : cashFlowJournalSNGSS.getItems()) {
-            System.out.println(cashFlowItem);
-        }
+
+        ReportXLS.ExportCashFlowJournal(cashFlowJournal, "F:\\TMP\\Report.xls");
     }
 
 }
