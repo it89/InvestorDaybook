@@ -1,4 +1,6 @@
-package com.github.it89.investordiary.stockmarket;
+package com.github.it89.investordiary.stockmarket.analysis;
+
+import com.github.it89.investordiary.stockmarket.*;
 
 import java.math.BigDecimal;
 import java.util.HashMap;

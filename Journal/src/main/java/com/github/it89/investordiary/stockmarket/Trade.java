@@ -1,12 +1,15 @@
 package com.github.it89.investordiary.stockmarket;
 
+import com.github.it89.investordiary.stockmarket.analysis.tradejournal.TradeItem;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Currency;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
-public abstract class Trade {
+public abstract class Trade implements Comparable{
     protected Asset asset;
     protected String applicationNumber;
     protected final String tradeNumber;
@@ -122,6 +125,19 @@ public abstract class Trade {
                 ", commission=" + commission +
                 ", tradeTags=" + tradeTags +
                 '}';
+    }
+
+    public static TreeSet<Trade> filterTreeSetByTag(TreeSet<Trade> set, TradeTag tag) {
+        TreeSet<Trade> newSet = new TreeSet<Trade>();
+        for(Trade trade : set) {
+            if(trade.tradeTags.values().contains(tag) || trade.asset.getTradeTags().values().contains(tag))
+                newSet.add(trade);
+        }
+        return newSet;
+    }
+
+    public int compareTo(Object o) {
+        return this.tradeNumber.compareTo(((Trade)o).tradeNumber);
     }
 
 }

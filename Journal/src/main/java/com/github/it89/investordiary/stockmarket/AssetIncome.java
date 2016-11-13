@@ -11,6 +11,7 @@ import java.util.TreeMap;
 public class AssetIncome extends CashFlow {
     private Asset asset;
     private BigDecimal tax;
+    private long amount;
 
     public Asset getAsset() {
         return asset;
@@ -28,6 +29,14 @@ public class AssetIncome extends CashFlow {
         this.tax = tax;
     }
 
+    public long getAmount() {
+        return amount;
+    }
+
+    public void setAmount(long amount) {
+        this.amount = amount;
+    }
+
     @Override
     public String toString() {
         return "AssetIncome{" +
@@ -38,6 +47,7 @@ public class AssetIncome extends CashFlow {
                 ", tradeTags=" + tradeTags +
                 ", asset=" + asset +
                 ", tax=" + tax +
+                ", amount" + amount +
                 '}';
     }
 }
