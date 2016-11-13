@@ -23,6 +23,11 @@
             <artifactId>backup</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.it89</groupId>
+            <artifactId>backup</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
 

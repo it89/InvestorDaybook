@@ -1,11 +1,10 @@
 import com.github.it89.investordiary.backup.xls.LoaderXLS;
-import com.github.it89.investordiary.backup.xls.ReportXLS;
-import com.github.it89.investordiary.stockmarket.*;
-import com.github.it89.investordiary.stockmarket.analysis.tradejournal.TradeJournal;
+import com.github.it89.investordiary.stockmarket.AssetPriceHistory;
+import com.github.it89.investordiary.stockmarket.StockMarketDaybook;
+import com.github.it89.investordiary.stockmarket.analysis.csv.LoadAssetPrice;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.TreeSet;
+import java.time.LocalDateTime;
 
 /**
  * Created by Axel on 17.09.2016.
@@ -53,7 +52,7 @@ public class Run {
 
         TradeJournal tradeJournalMGNT = tradeJournal.copyByTag(daybook.getTradeTag("SNGS-S"));*/
 
-        TreeSet<Trade> tradeSet = new TreeSet<Trade>();
+        /*TreeSet<Trade> tradeSet = new TreeSet<Trade>();
         tradeSet.addAll(daybook.getTradeStocks().values());
         tradeSet.addAll(daybook.getTradeBonds().values());
         tradeSet = Trade.filterTreeSetByTag(tradeSet, daybook.getTradeTag("MGNT"));
@@ -62,6 +61,15 @@ public class Run {
             tradeJournalMGNT.add(trade);
 
         ReportXLS.exportTradeJournal(tradeJournalMGNT, "F:\\TMP\\Report.xls");
+        for(Trade trade : tradeSet)
+            System.out.println(trade.getDate() + " " + trade.getTime());*/
+
+        //TreeSet<AssetPrice> assetPriceTreeSet = LoadAssetPrice.loadAll(daybook, "F:\\TMP\\AssetPrice");
+        //System.out.println(AssetPrice.getPrice(assetPriceTreeSet, daybook.getAsset("GAZP"), LocalDateTime.of(2016, 11, 11, 19, 0)));
+        AssetPriceHistory assetPriceHistory = new AssetPriceHistory();
+        LoadAssetPrice.loadAll(assetPriceHistory, daybook, "F:\\TMP\\AssetPrice");
+
+        System.out.println(assetPriceHistory.getPrice(daybook.getAsset("GAZP"), LocalDateTime.of(2016, 9, 29, 19, 0)));
     }
 
 }

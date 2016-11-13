@@ -45,9 +45,9 @@ public class TradeItem {
         this.asset = trade.getAsset();
 
         if(operation == TradeOperation.BUY)
-            this.amount = -trade.getAmount();
-        else
             this.amount = trade.getAmount();
+        else
+            this.amount = -trade.getAmount();
 
         if(operation == TradeOperation.BUY)
             this.volume = trade.getVolume().negate();

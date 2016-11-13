@@ -1,5 +1,6 @@
 package com.github.it89.investordiary.stockmarket;
 
+import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.TreeMap;
 
@@ -66,5 +67,9 @@ public class StockMarketDaybook {
                 ", tradeBonds=" + tradeBonds +
                 ", cashFlows=" + cashFlows +
                 '}';
+    }
+
+    public LocalTime getTimeCloseDay() {
+        return LocalTime.of(19, 0);
     }
 }
