@@ -1,13 +1,16 @@
 package com.github.it89.investordiary.stockmarket;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * Created by Axel on 15.10.2016.
  */
-public class CashFlow {
+public class CashFlow implements Comparable<CashFlow>{
     protected CashFlowType cashFlowType;
     protected LocalDate date;
     protected BigDecimal volume;
@@ -63,5 +66,25 @@ public class CashFlow {
                 ", comment='" + comment + '\'' +
                 ", tradeTags=" + tradeTags +
                 '}';
+    }
+
+    public static TreeSet<CashFlow> filterTreeSetByTag(TreeSet<CashFlow> set, TradeTag tag) {
+        TreeSet<CashFlow> newSet = new TreeSet();
+        for(CashFlow cashFlow : set) {
+            if(cashFlow.tradeTags.values().contains(tag))
+                newSet.add(cashFlow);
+            else if(cashFlow instanceof AssetIncome) {
+                if(((AssetIncome)cashFlow).getAsset().getTradeTags().values().contains(tag))
+                    newSet.add(cashFlow);
+            }
+        }
+        return newSet;
+    }
+
+    public int compareTo(@NotNull CashFlow o) {
+        int result = this.date.compareTo(o.date);
+        if(result != 0)
+            return result;
+        return this.volume.compareTo(o.volume);
     }
 }

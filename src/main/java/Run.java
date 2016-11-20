@@ -1,10 +1,16 @@
 import com.github.it89.investordiary.backup.xls.LoaderXLS;
-import com.github.it89.investordiary.stockmarket.AssetPriceHistory;
-import com.github.it89.investordiary.stockmarket.StockMarketDaybook;
+import com.github.it89.investordiary.backup.xls.ReportXLS;
+import com.github.it89.investordiary.stockmarket.*;
+import com.github.it89.investordiary.stockmarket.analysis.CashFlowJournal;
+import com.github.it89.investordiary.stockmarket.analysis.StockPortfolio;
 import com.github.it89.investordiary.stockmarket.analysis.csv.LoadAssetPrice;
+import com.github.it89.investordiary.stockmarket.analysis.profithistory.ProfitHistory;
+import com.github.it89.investordiary.stockmarket.analysis.tradejournal.TradeJournal;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.TreeSet;
 
 /**
  * Created by Axel on 17.09.2016.
@@ -16,41 +22,11 @@ public class Run {
     }
 
     private void run() throws IOException {
-        StockMarketDaybook daybook = new StockMarketDaybook();
-        String testFileXLS = "F:\\TMP\\Daybook.xls";
-        //testFileXLS = "test.xls";
-        LoaderXLS loader = new LoaderXLS(daybook, testFileXLS);
-        loader.load();
-        /*for (Map.Entry<String, Asset> entry : daybook.getAssets().entrySet())
-            System.out.println(entry.getValue());
-        for (Map.Entry<String, TradeStock> entry : daybook.getTradeStocks().entrySet())
-            System.out.println(entry.getValue());
-        for (Map.Entry<String, TradeBond> entry : daybook.getTradeBonds().entrySet())
-            System.out.println(entry.getValue());
-        for (CashFlow cashFlow : daybook.getCashFlows()) {
-            System.out.println(cashFlow);
-        }
-        System.out.println("Analysys-----------------------------------------");*/
-        /*CashFlowJournal cashFlowJournal = new CashFlowJournal();
-        for (Map.Entry<String, TradeStock> entry : daybook.getTradeStocks().entrySet())
-            cashFlowJournal.add(entry.getValue());
-        for (Map.Entry<String, TradeBond> entry : daybook.getTradeBonds().entrySet())
-            cashFlowJournal.add(entry.getValue());
-        for (CashFlow cashFlow : daybook.getCashFlows())
-            cashFlowJournal.add(cashFlow);
-        CashFlowJournal cashFlowJournalNKNCP = cashFlowJournal.copyByTag(daybook.getTradeTag("NKNCP"));
-        CashFlowJournal cashFlowJournalSNGSS = cashFlowJournal.copyByTag(daybook.getTradeTag("SNGS-S"));
-        CashFlowJournal cashFlowJournalMGNT = cashFlowJournal.copyByTag(daybook.getTradeTag("MGNT"));
-
-
-        ReportXLS.exportCashFlowJournal(cashFlowJournal, "F:\\TMP\\Report.xls");*/
-        /*TradeJournal tradeJournal = new TradeJournal();
-        for (Map.Entry<String, TradeStock> entry : daybook.getTradeStocks().entrySet())
-            tradeJournal.add(entry.getValue());
-        for (Map.Entry<String, TradeBond> entry : daybook.getTradeBonds().entrySet())
-            tradeJournal.add(entry.getValue());
-
-        TradeJournal tradeJournalMGNT = tradeJournal.copyByTag(daybook.getTradeTag("SNGS-S"));*/
+        StockMarketDaybook daybook = loadStockMarketDaybook();
+        //cashFlowJournal(daybook);
+        tradeJournal(daybook);
+        AssetPriceHistory assetPriceHistory = assetPriceHistory(daybook);
+        profitHistory(daybook, assetPriceHistory);
 
         /*TreeSet<Trade> tradeSet = new TreeSet<Trade>();
         tradeSet.addAll(daybook.getTradeStocks().values());
@@ -66,10 +42,78 @@ public class Run {
 
         //TreeSet<AssetPrice> assetPriceTreeSet = LoadAssetPrice.loadAll(daybook, "F:\\TMP\\AssetPrice");
         //System.out.println(AssetPrice.getPrice(assetPriceTreeSet, daybook.getAsset("GAZP"), LocalDateTime.of(2016, 11, 11, 19, 0)));
-        AssetPriceHistory assetPriceHistory = new AssetPriceHistory();
-        LoadAssetPrice.loadAll(assetPriceHistory, daybook, "F:\\TMP\\AssetPrice");
 
-        System.out.println(assetPriceHistory.getPrice(daybook.getAsset("GAZP"), LocalDateTime.of(2016, 9, 29, 19, 0)));
+
+        //System.out.println(assetPriceHistory.getPrice(daybook.getAsset("GAZP"), LocalDateTime.of(2016, 9, 29, 19, 0)));
+
+        /*TreeSet<Trade> tradeSet = new TreeSet<Trade>();
+        tradeSet.addAll(daybook.getTradeStocks().values());
+        tradeSet = Trade.filterTreeSetByTag(tradeSet, daybook.getTradeTag("GAZP"));
+
+        StockPortfolio stockPortfolio = new StockPortfolio();
+        for(Trade trade: tradeSet) {
+            stockPortfolio.add(trade);
+        }
+
+        System.out.println(stockPortfolio);*/
     }
 
+    private StockMarketDaybook loadStockMarketDaybook() throws IOException {
+        StockMarketDaybook daybook = new StockMarketDaybook();
+        String testFileXLS = "F:\\TMP\\Daybook.xls";
+        //testFileXLS = "test.xls";
+        LoaderXLS loader = new LoaderXLS(daybook, testFileXLS);
+        loader.load();
+        return daybook;
+    }
+
+    private void cashFlowJournal(StockMarketDaybook daybook) throws IOException {
+        CashFlowJournal cashFlowJournal = new CashFlowJournal();
+        for (Map.Entry<String, TradeStock> entry : daybook.getTradeStocks().entrySet())
+            cashFlowJournal.add(entry.getValue());
+        for (Map.Entry<String, TradeBond> entry : daybook.getTradeBonds().entrySet())
+            cashFlowJournal.add(entry.getValue());
+        for (CashFlow cashFlow : daybook.getCashFlows())
+            cashFlowJournal.add(cashFlow);
+        CashFlowJournal cashFlowJournalNKNCP = cashFlowJournal.copyByTag(daybook.getTradeTag("NKNCP"));
+        CashFlowJournal cashFlowJournalSNGSS = cashFlowJournal.copyByTag(daybook.getTradeTag("SNGS-S"));
+        CashFlowJournal cashFlowJournalMGNT = cashFlowJournal.copyByTag(daybook.getTradeTag("MGNT"));
+
+
+        ReportXLS.exportCashFlowJournal(cashFlowJournal, "F:\\TMP\\Report.xls");
+    }
+
+    private void tradeJournal(StockMarketDaybook daybook) throws IOException {
+        TradeJournal tradeJournal = new TradeJournal();
+        for (Map.Entry<String, TradeStock> entry : daybook.getTradeStocks().entrySet())
+            tradeJournal.add(entry.getValue());
+        for (Map.Entry<String, TradeBond> entry : daybook.getTradeBonds().entrySet())
+            tradeJournal.add(entry.getValue());
+
+        TradeJournal tradeJournalMGNT = tradeJournal.copyByTag(daybook.getTradeTag("NKNCP"));
+
+        ReportXLS.exportTradeJournal(tradeJournalMGNT, "F:\\TMP\\Report.xls");
+    }
+
+    private AssetPriceHistory assetPriceHistory(StockMarketDaybook daybook) throws IOException {
+        AssetPriceHistory assetPriceHistory = new AssetPriceHistory();
+        LoadAssetPrice.loadAll(assetPriceHistory, daybook, "F:\\TMP\\AssetPrice");
+        return assetPriceHistory;
+    }
+
+    private void profitHistory(StockMarketDaybook daybook, AssetPriceHistory assetPriceHistory) throws IOException {
+        ProfitHistory profitHistory = new ProfitHistory(assetPriceHistory);
+        TradeTag tradeTagNKNCP = daybook.getTradeTag("NKNCP");
+
+        TreeSet<Trade> tradeSet = new TreeSet<Trade>();
+        tradeSet.addAll(daybook.getTradeStocks().values());
+        tradeSet = Trade.filterTreeSetByTag(tradeSet, tradeTagNKNCP);
+
+        TreeSet<CashFlow> cashFlowSet = new TreeSet();
+        cashFlowSet.addAll(daybook.getCashFlows());
+        cashFlowSet = CashFlow.filterTreeSetByTag(cashFlowSet, tradeTagNKNCP);
+
+        profitHistory.fill(tradeSet, cashFlowSet);
+        ReportXLS.exportProfitHistory(profitHistory, "F:\\TMP\\ReportProfitHistory.xls");
+    }
 }

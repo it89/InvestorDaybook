@@ -140,4 +140,13 @@ public abstract class Trade implements Comparable{
         return this.tradeNumber.compareTo(((Trade)o).tradeNumber);
     }
 
+    public BigDecimal getTotalProfit() {
+        BigDecimal totalProfit = volume;
+        if(operation == TradeOperation.BUY)
+            totalProfit = totalProfit.negate();
+
+        totalProfit = totalProfit.add(commission.negate());
+        return totalProfit;
+    }
+
 }
