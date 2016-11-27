@@ -78,14 +78,4 @@ public class TradeBond extends Trade{
         else
             nominal = volume.doubleValue() / (double)amount / pricePct.doubleValue() * 100;
     }
-
-    @Override
-    public BigDecimal getTotalProfit() {
-        BigDecimal totalProfit = super.getTotalProfit();
-        if(operation == TradeOperation.SELL)
-            totalProfit = totalProfit.add(accumulatedCouponYield);
-        else
-            totalProfit = totalProfit.add(accumulatedCouponYield.negate());
-        return totalProfit;
-    }
 }

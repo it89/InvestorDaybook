@@ -5,10 +5,10 @@ import com.github.it89.investordiary.stockmarket.AssetPriceHistory;
 import com.github.it89.investordiary.stockmarket.CashFlow;
 import com.github.it89.investordiary.stockmarket.Trade;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Iterator;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.time.LocalDateTime;
+import java.util.*;
 
 /**
  * Created by Axel on 20.11.2016.
@@ -66,6 +66,35 @@ public class ProfitHistory {
                 } while (trade != null);
             }
         }
+        expandByAssetPriceHistory();
+        fillPaperProfit();
+    }
+
+    private void expandByAssetPriceHistory() {
+        TreeMap<LocalDate, ProfitHistoryItem> newItems = new TreeMap();
+
+        ProfitHistoryItem itemPrev = null;
+        LocalDate datePrev = null;
+        for(Map.Entry<LocalDate, ProfitHistoryItem> entryDateItem : items.entrySet()) {
+            if(itemPrev == null) {
+                itemPrev = entryDateItem.getValue();
+                datePrev = entryDateItem.getKey();
+            } else {
+                ProfitHistoryItem item = entryDateItem.getValue();
+                LocalDate date = entryDateItem.getKey();
+
+                TreeSet<LocalDate> localDates = assetPriceHistory.getDates(itemPrev.assetCount.keySet(), datePrev, date);
+                for(LocalDate localDate : localDates) {
+                    if(localDate.isAfter(datePrev) && localDate.isBefore(date)) {
+                        ProfitHistoryItem newItem = itemPrev.copy();
+                        newItems.put(localDate, newItem);
+                    }
+                }
+                itemPrev = item;
+                datePrev = date;
+            }
+        }
+        items.putAll(newItems);
     }
 
     private ProfitHistoryItem add(ProfitHistoryItem item, Trade trade) {
@@ -98,6 +127,17 @@ public class ProfitHistory {
             items.put(cashFlow.getDate(), newItem);
         }
         return newItem;
+    }
+
+    private void fillPaperProfit() {
+        for(Map.Entry<LocalDate, ProfitHistoryItem> entryDateItem : items.entrySet()) {
+            BigDecimal paperProfit = new BigDecimal(0);
+            for(Map.Entry<Asset, Long> entryAssetCount : entryDateItem.getValue().assetCount.entrySet()) {
+                paperProfit = paperProfit.add(new BigDecimal(entryAssetCount.getValue()).multiply(
+                        assetPriceHistory.getPrice(entryAssetCount.getKey(), entryDateItem.getKey())));
+            }
+            entryDateItem.getValue().setPaperProfit(paperProfit);
+        }
     }
 
     public TreeMap<LocalDate, ProfitHistoryItem> getItems() {

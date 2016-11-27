@@ -71,8 +71,6 @@ public class TradeItem {
 
     public BigDecimal getTotalProfit() {
         BigDecimal totalProfit = volume.add(commission);
-        if(accumulatedCouponYield != null)
-            totalProfit = totalProfit.add(accumulatedCouponYield);
         return totalProfit;
     }
 

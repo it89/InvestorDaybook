@@ -8,14 +8,15 @@ import com.github.it89.investordiary.stockmarket.analysis.profithistory.ProfitHi
 import com.github.it89.investordiary.stockmarket.analysis.tradejournal.TradeItem;
 import com.github.it89.investordiary.stockmarket.analysis.tradejournal.TradeJournal;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -118,17 +119,28 @@ public class ReportXLS {
         Workbook book = new HSSFWorkbook();
         Sheet sheet = book.createSheet("ProfitHistory");
 
+        DataFormat format = book.createDataFormat();
+        CellStyle dateStyle = book.createCellStyle();
+        dateStyle.setDataFormat(format.getFormat("dd.mm.yyyy"));
+
         Row row = sheet.createRow(0);
         row.createCell(0).setCellValue("Date");
         row.createCell(1).setCellValue("Profit not taxed");
         row.createCell(2).setCellValue("Profit taxed");
         row.createCell(3).setCellValue("Tax");
         row.createCell(4).setCellValue("Paper profit");
+        row.createCell(5).setCellValue("Total profit not taxed");
+        row.createCell(6).setCellValue("Total profit taxed");
+        row.createCell(7).setCellValue("Total paper profit not taxed");
+        row.createCell(8).setCellValue("Total paper profit taxed");
 
         int rowNumber = 1;
         for(Map.Entry<LocalDate, ProfitHistoryItem> entry : profitHistory.getItems().entrySet()) {
             row = sheet.createRow(rowNumber);
-            row.createCell(0).setCellValue(entry.getKey().toString());
+            Date date = Date.from(entry.getKey().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Cell cell = row.createCell(0);
+            cell.setCellStyle(dateStyle);
+            cell.setCellValue(date);
             row.createCell(1).setCellValue(entry.getValue().getSumProfitNotTaxed().doubleValue());
             row.createCell(2).setCellValue(entry.getValue().getSumProfitTaxed().doubleValue());
             row.createCell(3).setCellValue(entry.getValue().getSumTax().doubleValue());
@@ -136,6 +148,11 @@ public class ReportXLS {
             BigDecimal paperProfit = entry.getValue().getPaperProfit();
             if(paperProfit != null)
                 row.createCell(4).setCellValue(paperProfit.doubleValue());
+
+            row.createCell(5).setCellValue(entry.getValue().getTotalProfitNotTaxed().doubleValue());
+            row.createCell(6).setCellValue(entry.getValue().getTotalProfitTaxed().doubleValue());
+            row.createCell(7).setCellValue(entry.getValue().getTotalPaperProfitNotTaxed().doubleValue());
+            row.createCell(8).setCellValue(entry.getValue().getTotalPaperProfitTaxed().doubleValue());
 
             rowNumber++;
         }
@@ -145,6 +162,10 @@ public class ReportXLS {
         sheet.autoSizeColumn(2);
         sheet.autoSizeColumn(3);
         sheet.autoSizeColumn(4);
+        sheet.autoSizeColumn(5);
+        sheet.autoSizeColumn(6);
+        sheet.autoSizeColumn(7);
+        sheet.autoSizeColumn(8);
 
         book.write(new FileOutputStream(filename));
         book.close();

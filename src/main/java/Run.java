@@ -1,3 +1,4 @@
+import com.github.it89.investordiary.TaxCalculator;
 import com.github.it89.investordiary.backup.xls.LoaderXLS;
 import com.github.it89.investordiary.backup.xls.ReportXLS;
 import com.github.it89.investordiary.stockmarket.*;
@@ -8,7 +9,11 @@ import com.github.it89.investordiary.stockmarket.analysis.profithistory.ProfitHi
 import com.github.it89.investordiary.stockmarket.analysis.tradejournal.TradeJournal;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -103,17 +108,22 @@ public class Run {
 
     private void profitHistory(StockMarketDaybook daybook, AssetPriceHistory assetPriceHistory) throws IOException {
         ProfitHistory profitHistory = new ProfitHistory(assetPriceHistory);
-        TradeTag tradeTagNKNCP = daybook.getTradeTag("NKNCP");
+        TradeTag tradeTagMGNT = daybook.getTradeTag("LNTA");
+        TradeTag tradeTag1 = daybook.getTradeTag("1");
 
         TreeSet<Trade> tradeSet = new TreeSet<Trade>();
         tradeSet.addAll(daybook.getTradeStocks().values());
-        tradeSet = Trade.filterTreeSetByTag(tradeSet, tradeTagNKNCP);
+        tradeSet = Trade.filterTreeSetByTag(tradeSet, tradeTagMGNT);
+        tradeSet = Trade.filterTreeSetByTag(tradeSet, tradeTag1);
 
         TreeSet<CashFlow> cashFlowSet = new TreeSet();
         cashFlowSet.addAll(daybook.getCashFlows());
-        cashFlowSet = CashFlow.filterTreeSetByTag(cashFlowSet, tradeTagNKNCP);
+        cashFlowSet = CashFlow.filterTreeSetByTag(cashFlowSet, tradeTagMGNT);
+        cashFlowSet = CashFlow.filterTreeSetByTag(cashFlowSet, tradeTag1);
 
         profitHistory.fill(tradeSet, cashFlowSet);
         ReportXLS.exportProfitHistory(profitHistory, "F:\\TMP\\ReportProfitHistory.xls");
+
+
     }
 }

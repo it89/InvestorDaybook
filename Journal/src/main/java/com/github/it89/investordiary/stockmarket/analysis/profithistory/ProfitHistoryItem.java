@@ -1,5 +1,6 @@
 package com.github.it89.investordiary.stockmarket.analysis.profithistory;
 
+import com.github.it89.investordiary.TaxCalculator;
 import com.github.it89.investordiary.stockmarket.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -100,5 +101,32 @@ public class ProfitHistoryItem {
 
     public void setPaperProfit(BigDecimal paperProfit) {
         this.paperProfit = paperProfit;
+    }
+
+    public BigDecimal getTotalProfitNotTaxed() {
+        return sumProfitNotTaxed.add(sumProfitTaxed);
+    }
+
+    public BigDecimal getTotalProfitTaxed() {
+        BigDecimal totalProfitTaxed = sumProfitTaxed.add(sumTax.negate());
+        totalProfitTaxed = totalProfitTaxed.add(sumProfitNotTaxed.add(TaxCalculator.getTax(sumProfitNotTaxed).negate()));
+        return totalProfitTaxed;
+    }
+
+    public BigDecimal getTotalPaperProfitNotTaxed() {
+        return sumProfitNotTaxed.add(sumProfitTaxed).add(paperProfit);
+    }
+
+    public BigDecimal getTotalPaperProfitTaxed() {
+        BigDecimal totalProfitTaxed = sumProfitTaxed.add(sumTax.negate());
+        BigDecimal totalProfitNotTaxed = sumProfitNotTaxed.add(paperProfit);
+        totalProfitTaxed = totalProfitTaxed.add(totalProfitNotTaxed.add(TaxCalculator.getTax(totalProfitNotTaxed).negate()));
+        return totalProfitTaxed;
+    }
+
+    ProfitHistoryItem copy() {
+        ProfitHistoryItem newItem = new ProfitHistoryItem(sumProfitNotTaxed, sumProfitTaxed, sumTax);
+        newItem.assetCount.putAll(assetCount);
+        return newItem;
     }
 }
