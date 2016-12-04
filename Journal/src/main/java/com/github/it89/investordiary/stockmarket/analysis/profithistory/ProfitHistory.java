@@ -75,6 +75,7 @@ public class ProfitHistory {
 
         ProfitHistoryItem itemPrev = null;
         LocalDate datePrev = null;
+        // Даты в промежутках
         for(Map.Entry<LocalDate, ProfitHistoryItem> entryDateItem : items.entrySet()) {
             if(itemPrev == null) {
                 itemPrev = entryDateItem.getValue();
@@ -94,6 +95,14 @@ public class ProfitHistory {
                 datePrev = date;
             }
         }
+
+        // Оставшиеся даты
+        TreeSet<LocalDate> localDates = assetPriceHistory.getDates(itemPrev.assetCount.keySet(), datePrev.plusDays(1), LocalDate.now());
+        for(LocalDate date : localDates) {
+            ProfitHistoryItem newItem = itemPrev.copy();
+            newItems.put(date, newItem);
+        }
+
         items.putAll(newItems);
     }
 

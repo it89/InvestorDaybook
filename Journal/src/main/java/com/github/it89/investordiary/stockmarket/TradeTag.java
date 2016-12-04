@@ -1,9 +1,11 @@
 package com.github.it89.investordiary.stockmarket;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Created by Axel on 08.10.2016.
  */
-public class TradeTag {
+public class TradeTag implements Comparable<TradeTag>{
     private final String tag;
 
     public TradeTag(String tag) {
@@ -19,5 +21,9 @@ public class TradeTag {
         return "TradeTag{" +
                 "tag='" + tag + '\'' +
                 '}';
+    }
+
+    public int compareTo(@NotNull TradeTag o) {
+        return tag.compareTo(o.tag);
     }
 }

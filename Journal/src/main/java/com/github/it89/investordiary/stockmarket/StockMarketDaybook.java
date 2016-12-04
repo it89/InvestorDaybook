@@ -18,7 +18,6 @@ public class StockMarketDaybook {
         return assets;
     }
 
-
     public TreeMap<String, TradeStock> getTradeStocks() {
         return tradeStocks;
     }

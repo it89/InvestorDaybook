@@ -3,6 +3,7 @@ import com.github.it89.investordiary.backup.xls.LoaderXLS;
 import com.github.it89.investordiary.backup.xls.ReportXLS;
 import com.github.it89.investordiary.stockmarket.*;
 import com.github.it89.investordiary.stockmarket.analysis.CashFlowJournal;
+import com.github.it89.investordiary.stockmarket.analysis.ProfitResult;
 import com.github.it89.investordiary.stockmarket.analysis.StockPortfolio;
 import com.github.it89.investordiary.stockmarket.analysis.csv.LoadAssetPrice;
 import com.github.it89.investordiary.stockmarket.analysis.profithistory.ProfitHistory;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
@@ -29,9 +31,10 @@ public class Run {
     private void run() throws IOException {
         StockMarketDaybook daybook = loadStockMarketDaybook();
         //cashFlowJournal(daybook);
-        tradeJournal(daybook);
-        AssetPriceHistory assetPriceHistory = assetPriceHistory(daybook);
-        profitHistory(daybook, assetPriceHistory);
+        //tradeJournal(daybook);
+        //AssetPriceHistory assetPriceHistory = assetPriceHistory(daybook);
+        //profitHistory(daybook, assetPriceHistory);
+        profitResult(daybook);
 
         /*TreeSet<Trade> tradeSet = new TreeSet<Trade>();
         tradeSet.addAll(daybook.getTradeStocks().values());
@@ -108,7 +111,7 @@ public class Run {
 
     private void profitHistory(StockMarketDaybook daybook, AssetPriceHistory assetPriceHistory) throws IOException {
         ProfitHistory profitHistory = new ProfitHistory(assetPriceHistory);
-        TradeTag tradeTagMGNT = daybook.getTradeTag("LNTA");
+        TradeTag tradeTagMGNT = daybook.getTradeTag("UPRO");
         TradeTag tradeTag1 = daybook.getTradeTag("1");
 
         TreeSet<Trade> tradeSet = new TreeSet<Trade>();
@@ -125,5 +128,14 @@ public class Run {
         ReportXLS.exportProfitHistory(profitHistory, "F:\\TMP\\ReportProfitHistory.xls");
 
 
+    }
+
+    private void profitResult(StockMarketDaybook daybook) {
+        TreeMap<TradeTag, TreeSet<TradeTag>> combinations = ProfitResult.getAssetTradeTagCombinations(daybook);
+        for(Map.Entry<TradeTag, TreeSet<TradeTag>> entry : combinations.entrySet()) {
+            for(TradeTag logicalTrade : entry.getValue()) {
+                System.out.println(entry.getKey().getTag() + "\t>>>\t" + logicalTrade.getTag());
+            }
+        }
     }
 }
