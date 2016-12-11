@@ -33,8 +33,13 @@ public class Run {
         //cashFlowJournal(daybook);
         //tradeJournal(daybook);
         AssetPriceHistory assetPriceHistory = assetPriceHistory(daybook);
-        profitHistory(daybook, assetPriceHistory);
-        profitResult(daybook, assetPriceHistory);
+
+        TreeSet<TradeBond> tradeBondSet = new TreeSet();
+        tradeBondSet.addAll(daybook.getTradeBonds().values());
+        BondNominalHistory bondNominalHistory = new BondNominalHistory(tradeBondSet);
+
+        profitHistory(daybook, assetPriceHistory, bondNominalHistory);
+        profitResult(daybook, assetPriceHistory, bondNominalHistory);
 
         /*TreeSet<Trade> tradeSet = new TreeSet<Trade>();
         tradeSet.addAll(daybook.getTradeStocks().values());
@@ -72,6 +77,10 @@ public class Run {
         //testFileXLS = "test.xls";
         LoaderXLS loader = new LoaderXLS(daybook, testFileXLS);
         loader.load();
+
+        /*for(TradeBond bond : daybook.getTradeBonds().values()) {
+            System.out.println(bond);
+        }*/
         return daybook;
     }
 
@@ -109,8 +118,10 @@ public class Run {
         return assetPriceHistory;
     }
 
-    private void profitHistory(StockMarketDaybook daybook, AssetPriceHistory assetPriceHistory) throws IOException {
-        ProfitHistory profitHistory = new ProfitHistory(assetPriceHistory);
+    private void profitHistory(StockMarketDaybook daybook,
+                               AssetPriceHistory assetPriceHistory,
+                               BondNominalHistory bondNominalHistory) throws IOException {
+        ProfitHistory profitHistory = new ProfitHistory(assetPriceHistory, bondNominalHistory);
         Asset asset = daybook.getAsset("RU000A0JVBN2");
         int stageNumber = 1;
         profitHistory.fill(daybook, asset, stageNumber);
@@ -119,13 +130,15 @@ public class Run {
 
     }
 
-    private void profitResult(StockMarketDaybook daybook, AssetPriceHistory assetPriceHistory) throws IOException {
+    private void profitResult(StockMarketDaybook daybook,
+                              AssetPriceHistory assetPriceHistory,
+                              BondNominalHistory bondNominalHistory) throws IOException {
         TreeMap<Asset, TreeSet<Integer>> combinations = ProfitResult.getAssetStageCombinations(daybook);
         TreeSet<ProfitResult> results = new TreeSet<ProfitResult>();
         for(Map.Entry<Asset, TreeSet<Integer>> entry : combinations.entrySet()) {
             for(Integer stageNumber : entry.getValue()) {
                 //System.out.println(entry.getKey().getTicker() + " [" + stageNumber + "]");
-                ProfitHistory profitHistory = new ProfitHistory(assetPriceHistory);
+                ProfitHistory profitHistory = new ProfitHistory(assetPriceHistory, bondNominalHistory);
                 profitHistory.fill(daybook, entry.getKey(), stageNumber);
                 //System.out.println(new ProfitResult(profitHistory));
                 results.add(new ProfitResult(profitHistory, entry.getKey(), stageNumber));
