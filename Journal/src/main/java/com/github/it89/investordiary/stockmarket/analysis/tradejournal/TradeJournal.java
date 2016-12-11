@@ -18,13 +18,13 @@ public class TradeJournal {
     private final TreeSet<CashFlowItem> cashFlowItems = new TreeSet(new CashFlowItem.CashFlowItemComp());
 
     public void add(Trade trade) {
-        HashSet<TradeTag> tags = new HashSet();
+/*        HashSet<TradeTag> tags = new HashSet();
         tags.addAll(trade.getTradeTags().values());
-        tags.addAll(trade.getAsset().getTradeTags().values());
+        tags.addAll(trade.getAsset().getTradeTags().values());*/
 
         // Buy/Sell
         TradeItem tradeItem = new TradeItem(trade);
-        tradeItem.addTags(tags);
+        //tradeItem.addTags(tags);
         tradeItems.add(tradeItem);
     }
 
@@ -35,13 +35,13 @@ public class TradeJournal {
             tax = ((AssetIncome) cashFlow).getTax();
             asset = ((AssetIncome) cashFlow).getAsset();
         }
-        HashSet<TradeTag> tags = new HashSet();
+        /*HashSet<TradeTag> tags = new HashSet();
         tags.addAll(cashFlow.getTradeTags().values());
         if(asset != null)
-            tags.addAll(asset.getTradeTags().values());
+            tags.addAll(asset.getTradeTags().values());*/
 
         CashFlowItem item = new CashFlowItem(cashFlow.getDate(), LocalTime.of(0, 0), cashFlow.getCashFlowType(), cashFlow.getVolume(), tax);
-        item.addTags(tags);
+        //item.addTags(tags);
         cashFlowItems.add(item);
     }
 

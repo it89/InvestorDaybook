@@ -20,7 +20,7 @@ public abstract class Trade implements Comparable{
     protected Currency currency;
     protected BigDecimal volume;
     protected BigDecimal commission;
-    protected final TreeMap<String, TradeTag> tradeTags = new TreeMap();
+    protected int stageNumber;
 
     protected Trade(String tradeNumber) {
         this.tradeNumber = tradeNumber;
@@ -102,12 +102,12 @@ public abstract class Trade implements Comparable{
         this.commission = comission;
     }
 
-    public TreeMap<String, TradeTag> getTradeTags() {
-        return tradeTags;
+    public int getStageNumber() {
+        return stageNumber;
     }
 
-    public void addTradeTag(TradeTag tradeTag) {
-        tradeTags.put(tradeTag.getTag(), tradeTag);
+    public void setStageNumber(int stageNumber) {
+        this.stageNumber = stageNumber;
     }
 
     @Override
@@ -123,16 +123,23 @@ public abstract class Trade implements Comparable{
                 ", currency=" + currency +
                 ", volume=" + volume +
                 ", commission=" + commission +
-                ", tradeTags=" + tradeTags +
+                ", stageNumber=" + stageNumber +
                 '}';
     }
 
-    public static TreeSet<Trade> filterTreeSetByTag(TreeSet<Trade> set, TradeTag tag) {
-        TreeSet<Trade> newSet = new TreeSet<Trade>();
-        for(Trade trade : set) {
-            if(trade.tradeTags.values().contains(tag) || trade.asset.getTradeTags().values().contains(tag))
+    public static TreeSet<Trade> filterTreeSetByAsset(TreeSet<Trade> set, Asset asset) {
+        TreeSet<Trade> newSet = new TreeSet();
+        for(Trade trade : set)
+            if(trade.asset.equals(asset))
                 newSet.add(trade);
-        }
+        return newSet;
+    }
+
+    public static TreeSet<Trade> filterTreeSetByStageNumber(TreeSet<Trade> set, int stageNumber) {
+        TreeSet<Trade> newSet = new TreeSet();
+        for(Trade trade : set)
+            if(trade.stageNumber == stageNumber)
+                newSet.add(trade);
         return newSet;
     }
 

@@ -32,8 +32,8 @@ public class Run {
         StockMarketDaybook daybook = loadStockMarketDaybook();
         //cashFlowJournal(daybook);
         //tradeJournal(daybook);
-        //AssetPriceHistory assetPriceHistory = assetPriceHistory(daybook);
-        //profitHistory(daybook, assetPriceHistory);
+        AssetPriceHistory assetPriceHistory = assetPriceHistory(daybook);
+        profitHistory(daybook, assetPriceHistory);
         profitResult(daybook);
 
         /*TreeSet<Trade> tradeSet = new TreeSet<Trade>();
@@ -83,16 +83,16 @@ public class Run {
             cashFlowJournal.add(entry.getValue());
         for (CashFlow cashFlow : daybook.getCashFlows())
             cashFlowJournal.add(cashFlow);
-        CashFlowJournal cashFlowJournalNKNCP = cashFlowJournal.copyByTag(daybook.getTradeTag("NKNCP"));
+        /*CashFlowJournal cashFlowJournalNKNCP = cashFlowJournal.copyByTag(daybook.getTradeTag("NKNCP"));
         CashFlowJournal cashFlowJournalSNGSS = cashFlowJournal.copyByTag(daybook.getTradeTag("SNGS-S"));
-        CashFlowJournal cashFlowJournalMGNT = cashFlowJournal.copyByTag(daybook.getTradeTag("MGNT"));
+        CashFlowJournal cashFlowJournalMGNT = cashFlowJournal.copyByTag(daybook.getTradeTag("MGNT"));*/
 
 
         ReportXLS.exportCashFlowJournal(cashFlowJournal, "F:\\TMP\\Report.xls");
     }
 
     private void tradeJournal(StockMarketDaybook daybook) throws IOException {
-        TradeJournal tradeJournal = new TradeJournal();
+        /*TradeJournal tradeJournal = new TradeJournal();
         for (Map.Entry<String, TradeStock> entry : daybook.getTradeStocks().entrySet())
             tradeJournal.add(entry.getValue());
         for (Map.Entry<String, TradeBond> entry : daybook.getTradeBonds().entrySet())
@@ -100,7 +100,7 @@ public class Run {
 
         TradeJournal tradeJournalMGNT = tradeJournal.copyByTag(daybook.getTradeTag("NKNCP"));
 
-        ReportXLS.exportTradeJournal(tradeJournalMGNT, "F:\\TMP\\Report.xls");
+        ReportXLS.exportTradeJournal(tradeJournalMGNT, "F:\\TMP\\Report.xls");*/
     }
 
     private AssetPriceHistory assetPriceHistory(StockMarketDaybook daybook) throws IOException {
@@ -111,18 +111,17 @@ public class Run {
 
     private void profitHistory(StockMarketDaybook daybook, AssetPriceHistory assetPriceHistory) throws IOException {
         ProfitHistory profitHistory = new ProfitHistory(assetPriceHistory);
-        TradeTag tradeTagMGNT = daybook.getTradeTag("UPRO");
-        TradeTag tradeTag1 = daybook.getTradeTag("1");
-
-        TreeSet<Trade> tradeSet = new TreeSet<Trade>();
+        Asset asset = daybook.getAsset("MGNT");
+        int stageNumber = 1;
+        TreeSet<Trade> tradeSet = new TreeSet();
         tradeSet.addAll(daybook.getTradeStocks().values());
-        tradeSet = Trade.filterTreeSetByTag(tradeSet, tradeTagMGNT);
-        tradeSet = Trade.filterTreeSetByTag(tradeSet, tradeTag1);
+        tradeSet = Trade.filterTreeSetByAsset(tradeSet, asset);
+        tradeSet = Trade.filterTreeSetByStageNumber(tradeSet, stageNumber);
 
         TreeSet<CashFlow> cashFlowSet = new TreeSet();
         cashFlowSet.addAll(daybook.getCashFlows());
-        cashFlowSet = CashFlow.filterTreeSetByTag(cashFlowSet, tradeTagMGNT);
-        cashFlowSet = CashFlow.filterTreeSetByTag(cashFlowSet, tradeTag1);
+        cashFlowSet = CashFlow.filterTreeSetByAsset(cashFlowSet, asset);
+        cashFlowSet = CashFlow.filterTreeSetByStageNumber(cashFlowSet, stageNumber);
 
         profitHistory.fill(tradeSet, cashFlowSet);
         ReportXLS.exportProfitHistory(profitHistory, "F:\\TMP\\ReportProfitHistory.xls");
@@ -131,10 +130,10 @@ public class Run {
     }
 
     private void profitResult(StockMarketDaybook daybook) {
-        TreeMap<TradeTag, TreeSet<TradeTag>> combinations = ProfitResult.getAssetTradeTagCombinations(daybook);
-        for(Map.Entry<TradeTag, TreeSet<TradeTag>> entry : combinations.entrySet()) {
-            for(TradeTag logicalTrade : entry.getValue()) {
-                System.out.println(entry.getKey().getTag() + "\t>>>\t" + logicalTrade.getTag());
+        TreeMap<Asset, TreeSet<Integer>> combinations = ProfitResult.getAssetStageCombinations(daybook);
+        for(Map.Entry<Asset, TreeSet<Integer>> entry : combinations.entrySet()) {
+            for(Integer stageNumber : entry.getValue()) {
+                System.out.println(entry.getKey().getTicker() + "\t>>>\t" + stageNumber);
             }
         }
     }

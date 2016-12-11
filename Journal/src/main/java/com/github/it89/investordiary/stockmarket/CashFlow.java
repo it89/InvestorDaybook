@@ -15,7 +15,6 @@ public class CashFlow implements Comparable<CashFlow>{
     protected LocalDate date;
     protected BigDecimal volume;
     protected String comment;
-    protected final TreeMap<String, TradeTag> tradeTags = new TreeMap();
 
     public CashFlowType getCashFlowType() {
         return cashFlowType;
@@ -49,14 +48,6 @@ public class CashFlow implements Comparable<CashFlow>{
         this.comment = comment;
     }
 
-    public TreeMap<String, TradeTag> getTradeTags() {
-        return tradeTags;
-    }
-
-    public void addTradeTag(TradeTag tradeTag) {
-        tradeTags.put(tradeTag.getTag(), tradeTag);
-    }
-
     @Override
     public String toString() {
         return "CashFlow{" +
@@ -64,20 +55,27 @@ public class CashFlow implements Comparable<CashFlow>{
                 ", date=" + date +
                 ", volume=" + volume +
                 ", comment='" + comment + '\'' +
-                ", tradeTags=" + tradeTags +
                 '}';
     }
 
-    public static TreeSet<CashFlow> filterTreeSetByTag(TreeSet<CashFlow> set, TradeTag tag) {
+    public static TreeSet<CashFlow> filterTreeSetByAsset(TreeSet<CashFlow> set, Asset asset) {
         TreeSet<CashFlow> newSet = new TreeSet();
-        for(CashFlow cashFlow : set) {
-            if(cashFlow.tradeTags.values().contains(tag))
-                newSet.add(cashFlow);
-            else if(cashFlow instanceof AssetIncome) {
-                if(((AssetIncome)cashFlow).getAsset().getTradeTags().values().contains(tag))
-                    newSet.add(cashFlow);
-            }
-        }
+        for(CashFlow cashFlow : set)
+            if(cashFlow.getCashFlowType().isAssetIncome())
+                if(cashFlow instanceof AssetIncome)
+                    if(((AssetIncome)cashFlow).getAsset().equals(asset))
+                        newSet.add(cashFlow);
+
+        return newSet;
+    }
+
+    public static TreeSet<CashFlow> filterTreeSetByStageNumber(TreeSet<CashFlow> set, int stageNumber) {
+        TreeSet<CashFlow> newSet = new TreeSet();
+        for(CashFlow cashFlow : set)
+            if(cashFlow.getCashFlowType().isAssetIncome())
+                if(cashFlow instanceof AssetIncome)
+                    if(((AssetIncome)cashFlow).getStageNumber() == stageNumber)
+                        newSet.add(cashFlow);
         return newSet;
     }
 

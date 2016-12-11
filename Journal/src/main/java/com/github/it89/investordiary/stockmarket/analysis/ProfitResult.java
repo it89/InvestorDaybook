@@ -16,26 +16,20 @@ public class ProfitResult {
     private BigDecimal profitTaxed;
     private BigDecimal tax;
 
-    public static TreeMap<TradeTag, TreeSet<TradeTag>> getAssetTradeTagCombinations(StockMarketDaybook daybook) {
-        TreeMap<TradeTag, TreeSet<TradeTag>> result = new TreeMap();
+    public static TreeMap<Asset, TreeSet<Integer>> getAssetStageCombinations(StockMarketDaybook daybook) {
+        TreeMap<Asset, TreeSet<Integer>> result = new TreeMap<Asset, TreeSet<Integer>>();
         for(Asset asset : daybook.getAssets().values()) {
-            TradeTag assetTag = daybook.getTradeTag(asset.getTicker());
-            if(assetTag != null) {
-                TreeSet<Trade> trades = new TreeSet();
-                if (asset.getAssetType().isBond()) {
-                    trades.addAll((Collection<? extends Trade>) daybook.getTradeBonds().values());
-                } else {
-                    trades.addAll((Collection<? extends Trade>) daybook.getTradeStocks().values());
-                }
-                trades = Trade.filterTreeSetByTag(trades, assetTag);
-                // Пока предположим, что тег только 1, в будущем перейдем от тегов к параметрам
-                TreeSet<TradeTag> logicalTrades = new TreeSet();
-                for (Trade trade : trades) {
-                    TradeTag logicalTrade = trade.getTradeTags().firstEntry().getValue();
-                    logicalTrades.add(logicalTrade);
-                }
-                result.put(assetTag, logicalTrades);
-            }
+            TreeSet<Trade> trades = new TreeSet<Trade>();
+            if (asset.getAssetType().isBond())
+                trades.addAll((Collection<? extends Trade>) daybook.getTradeBonds().values());
+            else
+                trades.addAll((Collection<? extends Trade>) daybook.getTradeStocks().values());
+            trades = Trade.filterTreeSetByAsset(trades, asset);
+            TreeSet<Integer> stages = new TreeSet();
+            for(Trade trade : trades)
+                stages.add(trade.getStageNumber());
+            if(!stages.isEmpty())
+                result.put(asset, stages);
         }
         return result;
     }

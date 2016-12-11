@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Created by Axel on 08.10.2016.
  */
+@Deprecated
 public class TradeTag implements Comparable<TradeTag>{
     private final String tag;
 

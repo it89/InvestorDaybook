@@ -18,18 +18,18 @@ public class CashFlowJournal {
         if(trade.getOperation() == TradeOperation.BUY)
             volume = volume.negate();
 
-        HashSet<TradeTag> tags = new HashSet();
+        /*HashSet<TradeTag> tags = new HashSet();
         tags.addAll(trade.getTradeTags().values());
-        tags.addAll(trade.getAsset().getTradeTags().values());
+        tags.addAll(trade.getAsset().getTradeTags().values());*/
 
         // Buy/Sell
         CashFlowItem item = new CashFlowItem(trade.getDate(), trade.getTime(), CashFlowType.TRADE, volume, null);
-        item.addTags(tags);
+        //item.addTags(tags);
         items.add(item);
 
         // Comission
         item = new CashFlowItem(trade.getDate(), trade.getTime(), CashFlowType.COMMISSION_TRADE, trade.getCommission().negate(), null);
-        item.addTags(tags);
+        //item.addTags(tags);
         items.add(item);
 
         // AccumulatedCouponYield
@@ -39,7 +39,7 @@ public class CashFlowJournal {
             if(trade.getOperation() == TradeOperation.BUY)
                 accumulatedCouponYield = accumulatedCouponYield.negate();
             item = new CashFlowItem(trade.getDate(), trade.getTime(), CashFlowType.ACCUMULATED_COUPON_YIELD, accumulatedCouponYield, null);
-            item.addTags(tags);
+            //item.addTags(tags);
             items.add(item);
         }
     }
@@ -51,13 +51,13 @@ public class CashFlowJournal {
             tax = ((AssetIncome) cashFlow).getTax();
             asset = ((AssetIncome) cashFlow).getAsset();
         }
-        HashSet<TradeTag> tags = new HashSet();
+        /*HashSet<TradeTag> tags = new HashSet();
         tags.addAll(cashFlow.getTradeTags().values());
         if(asset != null)
-            tags.addAll(asset.getTradeTags().values());
+            tags.addAll(asset.getTradeTags().values());*/
 
         CashFlowItem item = new CashFlowItem(cashFlow.getDate(), LocalTime.of(0, 0), cashFlow.getCashFlowType(), cashFlow.getVolume(), tax);
-        item.addTags(tags);
+        //item.addTags(tags);
         items.add(item);
     }
 
