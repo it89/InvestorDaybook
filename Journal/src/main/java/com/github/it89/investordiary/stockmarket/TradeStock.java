@@ -33,7 +33,7 @@ public class TradeStock extends Trade {
                 ", currency=" + currency +
                 ", volume=" + volume +
                 ", commission=" + commission +
-                ", tradeTags=" + tradeTags +
+                ", stageNumber=" + stageNumber +
                 ", price=" + price +
                 '}';
     }

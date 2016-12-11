@@ -47,6 +47,8 @@ public class AssetPriceHistory {
         TreeSet<LocalDate> treeSet = new TreeSet();
         for(Asset asset : assets) {
             TreeMap<LocalDateTime, BigDecimal> treeDP = treeADP.get(asset);
+            if(treeDP == null)
+                throw new NullPointerException("Not exists Asset: " + asset.getTicker());
             SortedSet<LocalDateTime> dateTimes = treeDP.navigableKeySet();
             dateTimes = dateTimes.subSet(dateTimeFrom.atTime(0, 0), dateTimeTo.atTime(0, 0));
             for(LocalDateTime dateTime : dateTimes) {

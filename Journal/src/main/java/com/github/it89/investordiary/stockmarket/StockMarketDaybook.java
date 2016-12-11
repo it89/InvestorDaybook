@@ -11,7 +11,6 @@ public class StockMarketDaybook {
     private final TreeMap<String, Asset> assets = new TreeMap();
     private final TreeMap<String,TradeStock> tradeStocks = new TreeMap();
     private final TreeMap<String, TradeBond> tradeBonds = new TreeMap();
-    private final TreeMap<String, TradeTag> tradeTags = new TreeMap();
     private final HashSet<CashFlow> cashFlows = new HashSet();
 
     public TreeMap<String, Asset> getAssets() {
@@ -48,14 +47,6 @@ public class StockMarketDaybook {
 
     public void addCashFlow(CashFlow cashFlow) {
         cashFlows.add(cashFlow);
-    }
-
-    public TradeTag getTradeTag(String tag) {
-        return tradeTags.get(tag);
-    }
-
-    public void addTradeTag(TradeTag tradeTag) {
-        tradeTags.put(tradeTag.getTag(), tradeTag);
     }
 
     @Override

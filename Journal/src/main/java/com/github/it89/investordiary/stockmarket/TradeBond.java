@@ -52,7 +52,7 @@ public class TradeBond extends Trade{
                 ", currency=" + currency +
                 ", volume=" + volume +
                 ", commission=" + commission +
-                ", tradeTags=" + tradeTags +
+                ", stageNumber=" + stageNumber +
                 ", pricePct=" + pricePct +
                 ", nominal=" + nominal +
                 ", accumulatedCouponYield=" + accumulatedCouponYield +
@@ -76,6 +76,6 @@ public class TradeBond extends Trade{
         if(amount == 0 || volume == null || pricePct == null)
             nominal = 0;
         else
-            nominal = volume.doubleValue() / (double)amount / pricePct.doubleValue() * 100;
+            nominal = volume.add(accumulatedCouponYield.negate()).doubleValue() / (double)amount / pricePct.doubleValue() * 100;
     }
 }

@@ -12,6 +12,7 @@ public class AssetIncome extends CashFlow {
     private Asset asset;
     private BigDecimal tax;
     private long amount;
+    protected int stageNumber;
 
     public Asset getAsset() {
         return asset;
@@ -37,6 +38,14 @@ public class AssetIncome extends CashFlow {
         this.amount = amount;
     }
 
+    public int getStageNumber() {
+        return stageNumber;
+    }
+
+    public void setStageNumber(int stageNumber) {
+        this.stageNumber = stageNumber;
+    }
+
     @Override
     public String toString() {
         return "AssetIncome{" +
@@ -44,10 +53,10 @@ public class AssetIncome extends CashFlow {
                 ", date=" + date +
                 ", volume=" + volume +
                 ", comment='" + comment + '\'' +
-                ", tradeTags=" + tradeTags +
                 ", asset=" + asset +
                 ", tax=" + tax +
                 ", amount" + amount +
+                ", stageNumber" + stageNumber +
                 '}';
     }
 }

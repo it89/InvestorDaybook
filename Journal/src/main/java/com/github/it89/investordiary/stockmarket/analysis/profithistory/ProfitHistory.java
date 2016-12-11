@@ -1,9 +1,6 @@
 package com.github.it89.investordiary.stockmarket.analysis.profithistory;
 
-import com.github.it89.investordiary.stockmarket.Asset;
-import com.github.it89.investordiary.stockmarket.AssetPriceHistory;
-import com.github.it89.investordiary.stockmarket.CashFlow;
-import com.github.it89.investordiary.stockmarket.Trade;
+import com.github.it89.investordiary.stockmarket.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,9 +13,11 @@ import java.util.*;
 public class ProfitHistory {
     private final TreeMap<LocalDate, ProfitHistoryItem> items = new TreeMap();
     private AssetPriceHistory assetPriceHistory;
+    private BondNominalHistory bondNominalHistory;
 
-    public ProfitHistory(AssetPriceHistory assetPriceHistory) {
+    public ProfitHistory(AssetPriceHistory assetPriceHistory, BondNominalHistory bondNominalHistory) {
         this.assetPriceHistory = assetPriceHistory;
+        this.bondNominalHistory = bondNominalHistory;
     }
 
     public void fill(TreeSet<Trade> trades, TreeSet<CashFlow> cashFlows) {
@@ -75,6 +74,8 @@ public class ProfitHistory {
 
         ProfitHistoryItem itemPrev = null;
         LocalDate datePrev = null;
+        if(items.isEmpty())
+            throw new NullPointerException("TreeMap ProfitHistoryItem is null");
         // Даты в промежутках
         for(Map.Entry<LocalDate, ProfitHistoryItem> entryDateItem : items.entrySet()) {
             if(itemPrev == null) {
@@ -142,8 +143,12 @@ public class ProfitHistory {
         for(Map.Entry<LocalDate, ProfitHistoryItem> entryDateItem : items.entrySet()) {
             BigDecimal paperProfit = new BigDecimal(0);
             for(Map.Entry<Asset, Long> entryAssetCount : entryDateItem.getValue().assetCount.entrySet()) {
-                paperProfit = paperProfit.add(new BigDecimal(entryAssetCount.getValue()).multiply(
-                        assetPriceHistory.getPrice(entryAssetCount.getKey(), entryDateItem.getKey())));
+                BigDecimal price = assetPriceHistory.getPrice(entryAssetCount.getKey(), entryDateItem.getKey());
+                if(entryAssetCount.getKey().getAssetType().isBond()) {
+                    BigDecimal nominal = bondNominalHistory.getNominal(entryAssetCount.getKey(), entryDateItem.getKey());
+                    price = price.divide(BigDecimal.valueOf(100)).multiply(nominal);
+                }
+                paperProfit = paperProfit.add(new BigDecimal(entryAssetCount.getValue()).multiply(price));
             }
             entryDateItem.getValue().setPaperProfit(paperProfit);
         }
@@ -151,5 +156,22 @@ public class ProfitHistory {
 
     public TreeMap<LocalDate, ProfitHistoryItem> getItems() {
         return items;
+    }
+
+    public void fill(StockMarketDaybook daybook, Asset asset, int stageNumber) {
+        TreeSet<Trade> tradeSet = new TreeSet();
+        tradeSet.addAll(daybook.getTradeStocks().values());
+        tradeSet.addAll(daybook.getTradeBonds().values());
+        tradeSet = Trade.filterTreeSetByAsset(tradeSet, asset);
+        tradeSet = Trade.filterTreeSetByStageNumber(tradeSet, stageNumber);
+
+        TreeSet<CashFlow> cashFlowSet = new TreeSet();
+        cashFlowSet.addAll(daybook.getCashFlows());
+        cashFlowSet = CashFlow.filterTreeSetByAsset(cashFlowSet, asset);
+        cashFlowSet = CashFlow.filterTreeSetByStageNumber(cashFlowSet, stageNumber);
+
+        if(tradeSet.isEmpty() && cashFlowSet.isEmpty())
+            throw new NullPointerException("Test:" + asset.getCaption() + " [" + stageNumber + "]");
+        fill(tradeSet, cashFlowSet);
     }
 }
