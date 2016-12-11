@@ -34,7 +34,7 @@ public class Run {
         //tradeJournal(daybook);
         AssetPriceHistory assetPriceHistory = assetPriceHistory(daybook);
         profitHistory(daybook, assetPriceHistory);
-        profitResult(daybook);
+        profitResult(daybook, assetPriceHistory);
 
         /*TreeSet<Trade> tradeSet = new TreeSet<Trade>();
         tradeSet.addAll(daybook.getTradeStocks().values());
@@ -111,29 +111,22 @@ public class Run {
 
     private void profitHistory(StockMarketDaybook daybook, AssetPriceHistory assetPriceHistory) throws IOException {
         ProfitHistory profitHistory = new ProfitHistory(assetPriceHistory);
-        Asset asset = daybook.getAsset("MGNT");
+        Asset asset = daybook.getAsset("RU000A0JVBN2");
         int stageNumber = 1;
-        TreeSet<Trade> tradeSet = new TreeSet();
-        tradeSet.addAll(daybook.getTradeStocks().values());
-        tradeSet = Trade.filterTreeSetByAsset(tradeSet, asset);
-        tradeSet = Trade.filterTreeSetByStageNumber(tradeSet, stageNumber);
-
-        TreeSet<CashFlow> cashFlowSet = new TreeSet();
-        cashFlowSet.addAll(daybook.getCashFlows());
-        cashFlowSet = CashFlow.filterTreeSetByAsset(cashFlowSet, asset);
-        cashFlowSet = CashFlow.filterTreeSetByStageNumber(cashFlowSet, stageNumber);
-
-        profitHistory.fill(tradeSet, cashFlowSet);
+        profitHistory.fill(daybook, asset, stageNumber);
         ReportXLS.exportProfitHistory(profitHistory, "F:\\TMP\\ReportProfitHistory.xls");
 
 
     }
 
-    private void profitResult(StockMarketDaybook daybook) {
+    private void profitResult(StockMarketDaybook daybook, AssetPriceHistory assetPriceHistory) {
         TreeMap<Asset, TreeSet<Integer>> combinations = ProfitResult.getAssetStageCombinations(daybook);
         for(Map.Entry<Asset, TreeSet<Integer>> entry : combinations.entrySet()) {
             for(Integer stageNumber : entry.getValue()) {
-                System.out.println(entry.getKey().getTicker() + "\t>>>\t" + stageNumber);
+                System.out.println(entry.getKey().getTicker() + " [" + stageNumber + "]");
+                ProfitHistory profitHistory = new ProfitHistory(assetPriceHistory);
+                profitHistory.fill(daybook, entry.getKey(), stageNumber);
+                System.out.println(new ProfitResult(profitHistory));
             }
         }
     }

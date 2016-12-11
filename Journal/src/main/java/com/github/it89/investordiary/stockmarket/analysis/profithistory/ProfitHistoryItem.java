@@ -124,6 +124,10 @@ public class ProfitHistoryItem {
         return totalProfitTaxed;
     }
 
+    public TreeMap<Asset, Long> getAssetCount() {
+        return assetCount;
+    }
+
     ProfitHistoryItem copy() {
         ProfitHistoryItem newItem = new ProfitHistoryItem(sumProfitNotTaxed, sumProfitTaxed, sumTax);
         newItem.assetCount.putAll(assetCount);

@@ -1,9 +1,6 @@
 package com.github.it89.investordiary.stockmarket.analysis.profithistory;
 
-import com.github.it89.investordiary.stockmarket.Asset;
-import com.github.it89.investordiary.stockmarket.AssetPriceHistory;
-import com.github.it89.investordiary.stockmarket.CashFlow;
-import com.github.it89.investordiary.stockmarket.Trade;
+import com.github.it89.investordiary.stockmarket.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -75,6 +72,8 @@ public class ProfitHistory {
 
         ProfitHistoryItem itemPrev = null;
         LocalDate datePrev = null;
+        if(items.isEmpty())
+            throw new NullPointerException("TreeMap ProfitHistoryItem is null");
         // Даты в промежутках
         for(Map.Entry<LocalDate, ProfitHistoryItem> entryDateItem : items.entrySet()) {
             if(itemPrev == null) {
@@ -151,5 +150,22 @@ public class ProfitHistory {
 
     public TreeMap<LocalDate, ProfitHistoryItem> getItems() {
         return items;
+    }
+
+    public void fill(StockMarketDaybook daybook, Asset asset, int stageNumber) {
+        TreeSet<Trade> tradeSet = new TreeSet();
+        tradeSet.addAll(daybook.getTradeStocks().values());
+        tradeSet.addAll(daybook.getTradeBonds().values());
+        tradeSet = Trade.filterTreeSetByAsset(tradeSet, asset);
+        tradeSet = Trade.filterTreeSetByStageNumber(tradeSet, stageNumber);
+
+        TreeSet<CashFlow> cashFlowSet = new TreeSet();
+        cashFlowSet.addAll(daybook.getCashFlows());
+        cashFlowSet = CashFlow.filterTreeSetByAsset(cashFlowSet, asset);
+        cashFlowSet = CashFlow.filterTreeSetByStageNumber(cashFlowSet, stageNumber);
+
+        if(tradeSet.isEmpty() && cashFlowSet.isEmpty())
+            throw new NullPointerException("Test:" + asset.getCaption() + " [" + stageNumber + "]");
+        fill(tradeSet, cashFlowSet);
     }
 }
