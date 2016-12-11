@@ -3,6 +3,7 @@ package com.github.it89.investordiary.backup.xls;
 import com.github.it89.investordiary.stockmarket.TradeTag;
 import com.github.it89.investordiary.stockmarket.analysis.CashFlowItem;
 import com.github.it89.investordiary.stockmarket.analysis.CashFlowJournal;
+import com.github.it89.investordiary.stockmarket.analysis.ProfitResult;
 import com.github.it89.investordiary.stockmarket.analysis.profithistory.ProfitHistory;
 import com.github.it89.investordiary.stockmarket.analysis.profithistory.ProfitHistoryItem;
 import com.github.it89.investordiary.stockmarket.analysis.tradejournal.TradeItem;
@@ -10,6 +11,7 @@ import com.github.it89.investordiary.stockmarket.analysis.tradejournal.TradeJour
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -18,6 +20,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Map;
+import java.util.TreeSet;
 
 /**
  * Created by Axel on 24.10.2016.
@@ -166,6 +169,52 @@ public class ReportXLS {
         sheet.autoSizeColumn(6);
         sheet.autoSizeColumn(7);
         sheet.autoSizeColumn(8);
+
+        book.write(new FileOutputStream(filename));
+        book.close();
+    }
+
+    public static void exportProfitResult(TreeSet<ProfitResult> items, String filename) throws IOException {
+        Workbook book = new HSSFWorkbook();
+        Sheet sheet = book.createSheet("ProfitResult");
+
+        DataFormat format = book.createDataFormat();
+        CellStyle dateStyle = book.createCellStyle();
+        dateStyle.setDataFormat(format.getFormat("dd.mm.yyyy"));
+
+        Row row = sheet.createRow(0);
+        row.createCell(0).setCellValue("Asset");
+        row.createCell(1).setCellValue("Stage number");
+        row.createCell(2).setCellValue("Begin");
+        row.createCell(3).setCellValue("End");
+        row.createCell(4).setCellValue("Profit not taxed");
+
+        int rowNumber = 1;
+        for(ProfitResult item : items) {
+            row = sheet.createRow(rowNumber);
+            row.createCell(0).setCellValue(item.getAsset().getCaption());
+            row.createCell(1).setCellValue(item.getStageNumber());
+
+            Date begin = Date.from(item.getBegin().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Cell cell = row.createCell(2);
+            cell.setCellStyle(dateStyle);
+            cell.setCellValue(begin);
+
+            if(item.getEnd() != null) {
+                Date end = Date.from(item.getEnd().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                cell = row.createCell(3);
+                cell.setCellStyle(dateStyle);
+                cell.setCellValue(end);
+            }
+
+            row.createCell(4).setCellValue(item.getProfitNotTaxed().doubleValue());
+            rowNumber++;
+        }
+        sheet.autoSizeColumn(0);
+        sheet.autoSizeColumn(1);
+        sheet.autoSizeColumn(2);
+        sheet.autoSizeColumn(3);
+        sheet.autoSizeColumn(4);
 
         book.write(new FileOutputStream(filename));
         book.close();

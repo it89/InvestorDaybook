@@ -119,15 +119,18 @@ public class Run {
 
     }
 
-    private void profitResult(StockMarketDaybook daybook, AssetPriceHistory assetPriceHistory) {
+    private void profitResult(StockMarketDaybook daybook, AssetPriceHistory assetPriceHistory) throws IOException {
         TreeMap<Asset, TreeSet<Integer>> combinations = ProfitResult.getAssetStageCombinations(daybook);
+        TreeSet<ProfitResult> results = new TreeSet<ProfitResult>();
         for(Map.Entry<Asset, TreeSet<Integer>> entry : combinations.entrySet()) {
             for(Integer stageNumber : entry.getValue()) {
-                System.out.println(entry.getKey().getTicker() + " [" + stageNumber + "]");
+                //System.out.println(entry.getKey().getTicker() + " [" + stageNumber + "]");
                 ProfitHistory profitHistory = new ProfitHistory(assetPriceHistory);
                 profitHistory.fill(daybook, entry.getKey(), stageNumber);
-                System.out.println(new ProfitResult(profitHistory));
+                //System.out.println(new ProfitResult(profitHistory));
+                results.add(new ProfitResult(profitHistory, entry.getKey(), stageNumber));
             }
         }
+        ReportXLS.exportProfitResult(results, "F:\\TMP\\ReportProfitResult.xls");
     }
 }
