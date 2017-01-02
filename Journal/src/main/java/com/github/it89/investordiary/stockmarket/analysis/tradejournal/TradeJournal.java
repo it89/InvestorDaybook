@@ -1,7 +1,7 @@
 package com.github.it89.investordiary.stockmarket.analysis.tradejournal;
 
 import com.github.it89.investordiary.stockmarket.*;
-import com.github.it89.investordiary.stockmarket.analysis.CashFlowItem;
+import com.github.it89.investordiary.stockmarket.analysis.cashflow.CashFlowItem;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -31,16 +31,14 @@ public class TradeJournal {
     public void add(CashFlow cashFlow) {
         BigDecimal tax = null;
         Asset asset = null;
+        Integer stageNumber = null;
         if(cashFlow instanceof AssetIncome) {
             tax = ((AssetIncome) cashFlow).getTax();
             asset = ((AssetIncome) cashFlow).getAsset();
+            stageNumber = ((AssetIncome) cashFlow).getStageNumber();
         }
-        /*HashSet<TradeTag> tags = new HashSet();
-        tags.addAll(cashFlow.getTradeTags().values());
-        if(asset != null)
-            tags.addAll(asset.getTradeTags().values());*/
 
-        CashFlowItem item = new CashFlowItem(cashFlow.getDate(), LocalTime.of(0, 0), cashFlow.getCashFlowType(), cashFlow.getVolume(), tax);
+        CashFlowItem item = new CashFlowItem(cashFlow.getDate(), LocalTime.of(0, 0), cashFlow.getCashFlowType(), cashFlow.getVolume(), tax, asset, stageNumber);
         //item.addTags(tags);
         cashFlowItems.add(item);
     }

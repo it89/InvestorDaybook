@@ -11,7 +11,9 @@ public enum  CashFlowType {
     ACCUMULATED_COUPON_YIELD_PAYMENT(true),
     TRADE(false),
     COMMISSION_TRADE(false),
-    ACCUMULATED_COUPON_YIELD(false);
+    ACCUMULATED_COUPON_YIELD(false),
+    BOND_REDEMPTION(true),
+    DEPOSITARY_SUBSCRIPTION_FEE(false);
 
     private final boolean isAssetIncome;
 

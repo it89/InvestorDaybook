@@ -1,8 +1,8 @@
 package com.github.it89.investordiary.backup.xls;
 
 import com.github.it89.investordiary.stockmarket.TradeTag;
-import com.github.it89.investordiary.stockmarket.analysis.CashFlowItem;
-import com.github.it89.investordiary.stockmarket.analysis.CashFlowJournal;
+import com.github.it89.investordiary.stockmarket.analysis.cashflow.CashFlowItem;
+import com.github.it89.investordiary.stockmarket.analysis.cashflow.CashFlowJournal;
 import com.github.it89.investordiary.stockmarket.analysis.ProfitResult;
 import com.github.it89.investordiary.stockmarket.analysis.profithistory.ProfitHistory;
 import com.github.it89.investordiary.stockmarket.analysis.profithistory.ProfitHistoryItem;
@@ -11,13 +11,11 @@ import com.github.it89.investordiary.stockmarket.analysis.tradejournal.TradeJour
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeSet;
@@ -36,7 +34,8 @@ public class ReportXLS {
         row.createCell(2).setCellValue("Type");
         row.createCell(3).setCellValue("Money");
         row.createCell(4).setCellValue("Tax");
-        row.createCell(5).setCellValue("Tags");
+        row.createCell(5).setCellValue("Asset");
+        row.createCell(6).setCellValue("Stage number");
 
         int rowNumber = 1;
         for(CashFlowItem item : journal.getItems()) {
@@ -49,17 +48,14 @@ public class ReportXLS {
             if(tax != null)
                 row.createCell(4).setCellValue(tax.doubleValue());
             rowNumber++;
-            int tagNum = 0;
-            for(TradeTag tag : item.getTradeTags()) {
-                row.createCell(5 + tagNum++).setCellValue(tag.getTag());
-            }
+            if(item.getAsset() != null)
+                row.createCell(5).setCellValue(item.getAsset().getCaption());
+            if(item.getStageNumber() != null)
+                row.createCell(6).setCellValue(item.getStageNumber());
         }
 
-        sheet.autoSizeColumn(0);
-        sheet.autoSizeColumn(1);
-        sheet.autoSizeColumn(2);
-        sheet.autoSizeColumn(3);
-        sheet.autoSizeColumn(4);
+        for(int i = 0; i < 6; i++)
+            sheet.autoSizeColumn(i);
 
         book.write(new FileOutputStream(filename));
         book.close();
