@@ -207,8 +207,15 @@ public class LoaderXLS {
     }
 
     public static BigDecimal getCashFlowTaxByComment(String comment) {
-        String taxString = comment.substring(comment.indexOf("налог к удержанию") + "налог к удержанию".length() + 1);
-        taxString = taxString.substring(0, taxString.indexOf(' '));
-        return new BigDecimal(taxString);
+        final String TEXT_FIND_TAX = "налог к удержанию";
+        int textTaxIndex = comment.indexOf(TEXT_FIND_TAX);
+        if(textTaxIndex >= 0) {
+            String taxString = comment.substring(textTaxIndex + TEXT_FIND_TAX.length() + 1);
+            taxString = taxString.substring(0, taxString.indexOf(' '));
+            return new BigDecimal(taxString);
+        }
+        if(comment.indexOf("налог не удерживается") >= 0)
+            return new BigDecimal(0);
+        return null;
     }
 }

@@ -1,8 +1,9 @@
 package com.github.it89.investordiary.backup.xls;
 
+import com.github.it89.investordiary.stockmarket.CashFlow;
 import com.github.it89.investordiary.stockmarket.TradeTag;
-import com.github.it89.investordiary.stockmarket.analysis.CashFlowItem;
-import com.github.it89.investordiary.stockmarket.analysis.CashFlowJournal;
+import com.github.it89.investordiary.stockmarket.analysis.cashflow.CashFlowItem;
+import com.github.it89.investordiary.stockmarket.analysis.cashflow.CashFlowJournal;
 import com.github.it89.investordiary.stockmarket.analysis.ProfitResult;
 import com.github.it89.investordiary.stockmarket.analysis.profithistory.ProfitHistory;
 import com.github.it89.investordiary.stockmarket.analysis.profithistory.ProfitHistoryItem;
@@ -11,14 +12,13 @@ import com.github.it89.investordiary.stockmarket.analysis.tradejournal.TradeJour
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -36,7 +36,8 @@ public class ReportXLS {
         row.createCell(2).setCellValue("Type");
         row.createCell(3).setCellValue("Money");
         row.createCell(4).setCellValue("Tax");
-        row.createCell(5).setCellValue("Tags");
+        row.createCell(5).setCellValue("Asset");
+        row.createCell(6).setCellValue("Stage number");
 
         int rowNumber = 1;
         for(CashFlowItem item : journal.getItems()) {
@@ -49,17 +50,14 @@ public class ReportXLS {
             if(tax != null)
                 row.createCell(4).setCellValue(tax.doubleValue());
             rowNumber++;
-            int tagNum = 0;
-            for(TradeTag tag : item.getTradeTags()) {
-                row.createCell(5 + tagNum++).setCellValue(tag.getTag());
-            }
+            if(item.getAsset() != null)
+                row.createCell(5).setCellValue(item.getAsset().getCaption());
+            if(item.getStageNumber() != null)
+                row.createCell(6).setCellValue(item.getStageNumber());
         }
 
-        sheet.autoSizeColumn(0);
-        sheet.autoSizeColumn(1);
-        sheet.autoSizeColumn(2);
-        sheet.autoSizeColumn(3);
-        sheet.autoSizeColumn(4);
+        for(int i = 0; i < 6; i++)
+            sheet.autoSizeColumn(i);
 
         book.write(new FileOutputStream(filename));
         book.close();
@@ -78,41 +76,70 @@ public class ReportXLS {
         row.createCell(5).setCellValue("Commission");
         row.createCell(6).setCellValue("Accumulated Coupon Yield");
         row.createCell(7).setCellValue("Total Profit");
-        row.createCell(8).setCellValue("Tags");
+        row.createCell(8).setCellValue("Tax");
+        row.createCell(9).setCellValue("Stage number");
 
         int rowNumber = 1;
-        for(TradeItem item : journal.getTradeItems()) {
+        Iterator<TradeItem> tradeItemIterator = journal.getTradeItems().iterator();
+        Iterator<CashFlowItem> cashFlowItemIterator = journal.getCashFlowItems().iterator();
+        TradeItem tradeItem = null;
+        CashFlowItem cashFlowItem = null;
+        if(tradeItemIterator.hasNext())
+            tradeItem = tradeItemIterator.next();
+        if(cashFlowItemIterator.hasNext())
+            cashFlowItem = cashFlowItemIterator.next();
+
+        while(tradeItem != null || cashFlowItem != null) {
+            boolean isTradeItemRow = false;
+            if(cashFlowItem == null)
+                isTradeItemRow = true;
+            else
+                if(tradeItem != null)
+                    if(tradeItem.getDate().compareTo(cashFlowItem.getDate()) <= 0)
+                        isTradeItemRow = true;
+
             row = sheet.createRow(rowNumber);
-            row.createCell(0).setCellValue(item.getDate().toString());
-            row.createCell(1).setCellValue(item.getTime().toString());
-            row.createCell(2).setCellValue(item.getAsset().getCaption());
-            row.createCell(3).setCellValue(item.getAmount());
-            row.createCell(4).setCellValue(item.getVolume().doubleValue());
-            row.createCell(5).setCellValue(item.getCommission().doubleValue());
+            if(isTradeItemRow) {
+                row.createCell(0).setCellValue(tradeItem.getDate().toString());
+                row.createCell(1).setCellValue(tradeItem.getTime().toString());
+                row.createCell(2).setCellValue(tradeItem.getAsset().getCaption());
+                row.createCell(3).setCellValue(tradeItem.getAmount());
+                row.createCell(4).setCellValue(tradeItem.getVolume().doubleValue());
+                row.createCell(5).setCellValue(tradeItem.getCommission().doubleValue());
 
-            BigDecimal accumulatedCouponYield = item.getAccumulatedCouponYield();
-            if(accumulatedCouponYield != null)
-                row.createCell(6).setCellValue(accumulatedCouponYield.doubleValue());
+                BigDecimal accumulatedCouponYield = tradeItem.getAccumulatedCouponYield();
+                if(accumulatedCouponYield != null)
+                    row.createCell(6).setCellValue(accumulatedCouponYield.doubleValue());
 
-            row.createCell(7).setCellValue(item.getTotalProfit().doubleValue());
+                row.createCell(7).setCellValue(tradeItem.getTotalProfit().doubleValue());
 
-            rowNumber++;
-            int tagNum = 0;
-            for(TradeTag tag : item.getTradeTags()) {
-                row.createCell(8 + tagNum++).setCellValue(tag.getTag());
+                Integer stageNumber = tradeItem.getStageNumber();
+                if(stageNumber != null)
+                    row.createCell(9).setCellValue(stageNumber);
+
+                if(tradeItemIterator.hasNext())
+                    tradeItem = tradeItemIterator.next();
+                else
+                    tradeItem = null;
+            } else {
+                row.createCell(0).setCellValue(cashFlowItem.getDate().toString());
+                row.createCell(2).setCellValue(cashFlowItem.getAsset().getCaption());
+                row.createCell(7).setCellValue(cashFlowItem.getMoney().doubleValue());
+                row.createCell(8).setCellValue(cashFlowItem.getTax().doubleValue());
+                Integer stageNumber = cashFlowItem.getStageNumber();
+                if(stageNumber != null)
+                    row.createCell(9).setCellValue(stageNumber);
+
+                if(cashFlowItemIterator.hasNext())
+                    cashFlowItem = cashFlowItemIterator.next();
+                else
+                    cashFlowItem = null;
             }
+            rowNumber++;
         }
 
-        sheet.autoSizeColumn(0);
-        sheet.autoSizeColumn(1);
-        sheet.autoSizeColumn(2);
-        sheet.autoSizeColumn(3);
-        sheet.autoSizeColumn(4);
-        sheet.autoSizeColumn(5);
-        sheet.autoSizeColumn(6);
-        sheet.autoSizeColumn(7);
-        sheet.autoSizeColumn(8);
-
+        for(int i = 0; i <= 9; i++)
+            sheet.autoSizeColumn(i);
 
         book.write(new FileOutputStream(filename));
         book.close();
