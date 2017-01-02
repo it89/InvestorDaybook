@@ -5,6 +5,7 @@ import com.github.it89.investordiary.stockmarket.analysis.cashflow.CashFlowJourn
 import com.github.it89.investordiary.stockmarket.analysis.ProfitResult;
 import com.github.it89.investordiary.stockmarket.analysis.csv.LoadAssetPrice;
 import com.github.it89.investordiary.stockmarket.analysis.profithistory.ProfitHistory;
+import com.github.it89.investordiary.stockmarket.analysis.tradejournal.TradeJournal;
 
 import java.io.IOException;
 import java.util.Map;
@@ -22,8 +23,9 @@ public class Run {
 
     private void run() throws IOException {
         StockMarketDaybook daybook = loadStockMarketDaybook();
+
         cashFlowJournal(daybook);
-        //tradeJournal(daybook);
+        tradeJournal(daybook);
         AssetPriceHistory assetPriceHistory = assetPriceHistory(daybook);
 
         TreeSet<TradeBond> tradeBondSet = new TreeSet();
@@ -31,36 +33,7 @@ public class Run {
         BondNominalHistory bondNominalHistory = new BondNominalHistory(tradeBondSet);
 
         profitHistory(daybook, assetPriceHistory, bondNominalHistory);
-        //profitResult(daybook, assetPriceHistory, bondNominalHistory);
 
-        /*TreeSet<Trade> tradeSet = new TreeSet<Trade>();
-        tradeSet.addAll(daybook.getTradeStocks().values());
-        tradeSet.addAll(daybook.getTradeBonds().values());
-        tradeSet = Trade.filterTreeSetByTag(tradeSet, daybook.getTradeTag("MGNT"));
-        TradeJournal tradeJournalMGNT = new TradeJournal();
-        for(Trade trade : tradeSet)
-            tradeJournalMGNT.add(trade);
-
-        ReportXLS.exportTradeJournal(tradeJournalMGNT, "F:\\TMP\\Report.xls");
-        for(Trade trade : tradeSet)
-            System.out.println(trade.getDate() + " " + trade.getTime());*/
-
-        //TreeSet<AssetPrice> assetPriceTreeSet = LoadAssetPrice.loadAll(daybook, "F:\\TMP\\AssetPrice");
-        //System.out.println(AssetPrice.getPrice(assetPriceTreeSet, daybook.getAsset("GAZP"), LocalDateTime.of(2016, 11, 11, 19, 0)));
-
-
-        //System.out.println(assetPriceHistory.getPrice(daybook.getAsset("GAZP"), LocalDateTime.of(2016, 9, 29, 19, 0)));
-
-        /*TreeSet<Trade> tradeSet = new TreeSet<Trade>();
-        tradeSet.addAll(daybook.getTradeStocks().values());
-        tradeSet = Trade.filterTreeSetByTag(tradeSet, daybook.getTradeTag("GAZP"));
-
-        StockPortfolio stockPortfolio = new StockPortfolio();
-        for(Trade trade: tradeSet) {
-            stockPortfolio.add(trade);
-        }
-
-        System.out.println(stockPortfolio);*/
     }
 
     private StockMarketDaybook loadStockMarketDaybook() throws IOException {
@@ -84,15 +57,17 @@ public class Run {
     }
 
     private void tradeJournal(StockMarketDaybook daybook) throws IOException {
-        /*TradeJournal tradeJournal = new TradeJournal();
+        TradeJournal tradeJournal = new TradeJournal();
         for (Map.Entry<String, TradeStock> entry : daybook.getTradeStocks().entrySet())
             tradeJournal.add(entry.getValue());
         for (Map.Entry<String, TradeBond> entry : daybook.getTradeBonds().entrySet())
             tradeJournal.add(entry.getValue());
+        for(CashFlow cashFlow : daybook.getCashFlows())
+            tradeJournal.add(cashFlow);
 
-        TradeJournal tradeJournalMGNT = tradeJournal.copyByTag(daybook.getTradeTag("NKNCP"));
+        TradeJournal tradeJournalFlt = tradeJournal.copyByAsset(daybook.getAsset("RU000A0JWLX8"), null);
 
-        ReportXLS.exportTradeJournal(tradeJournalMGNT, "F:\\TMP\\Report.xls");*/
+        ReportXLS.exportTradeJournal(tradeJournalFlt, "F:\\TMP\\TradeJournal.xls");
     }
 
     private AssetPriceHistory assetPriceHistory(StockMarketDaybook daybook) throws IOException {

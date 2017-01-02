@@ -7,8 +7,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Created by Axel on 12.11.2016.
@@ -21,9 +19,9 @@ public class TradeItem {
     private final BigDecimal volume;
     private final BigDecimal commission;
     private @Nullable final BigDecimal accumulatedCouponYield;
-    final Set<TradeTag> tradeTags = new HashSet();
+    private @Nullable final Integer stageNumber;
 
-    public TradeItem(LocalDate date, LocalTime time, Asset asset, long amount, BigDecimal volume, BigDecimal commission, BigDecimal accumulatedCouponYield) {
+    public TradeItem(LocalDate date, LocalTime time, Asset asset, long amount, BigDecimal volume, BigDecimal commission, BigDecimal accumulatedCouponYield, Integer stageNumber) {
         this.date = date;
         this.time = time;
         this.asset = asset;
@@ -31,42 +29,39 @@ public class TradeItem {
         this.volume = volume;
         this.commission = commission;
         this.accumulatedCouponYield = accumulatedCouponYield;
+        this.stageNumber = stageNumber;
     }
 
     public TradeItem(Trade trade) {
         TradeOperation operation = trade.getOperation();
-        BigDecimal accumulatedCouponYield = null;
-        if(trade instanceof TradeBond) {
-            accumulatedCouponYield = ((TradeBond) trade).getAccumulatedCouponYield();
-        }
 
         this.date = trade.getDate();
         this.time = trade.getTime();
         this.asset = trade.getAsset();
+        this.stageNumber = trade.getStageNumber();
 
         if(operation == TradeOperation.BUY)
             this.amount = trade.getAmount();
         else
             this.amount = -trade.getAmount();
 
+        BigDecimal accumulatedCouponYield = null;
+        if(trade instanceof TradeBond)
+            accumulatedCouponYield = ((TradeBond) trade).getAccumulatedCouponYield();
+        if(accumulatedCouponYield != null && operation == TradeOperation.BUY)
+            accumulatedCouponYield = accumulatedCouponYield.negate();
+        this.accumulatedCouponYield = accumulatedCouponYield;
+
+        BigDecimal volume = trade.getVolume();
         if(operation == TradeOperation.BUY)
-            this.volume = trade.getVolume().negate();
-        else
-            this.volume = trade.getVolume();
+            volume = volume.negate();
+        if(accumulatedCouponYield != null)
+            volume = volume.add(accumulatedCouponYield.negate());
+        this.volume = volume;
 
         this.commission = trade.getCommission().negate();
 
-        if(accumulatedCouponYield != null)
-            if(operation == TradeOperation.BUY)
-                this.accumulatedCouponYield = accumulatedCouponYield.negate();
-            else
-                this.accumulatedCouponYield = accumulatedCouponYield;
-        else
-            this.accumulatedCouponYield = null;
-    }
 
-    public void addTags(Set<TradeTag> tags) {
-        tradeTags.addAll(tags);
     }
 
     public BigDecimal getTotalProfit() {
@@ -98,13 +93,14 @@ public class TradeItem {
         return commission;
     }
 
-    public Set<TradeTag> getTradeTags() {
-        return tradeTags;
-    }
-
     @Nullable
     public BigDecimal getAccumulatedCouponYield() {
         return accumulatedCouponYield;
+    }
+
+    @Nullable
+    public Integer getStageNumber() {
+        return stageNumber;
     }
 
     @Override
@@ -117,7 +113,8 @@ public class TradeItem {
                 ", volume=" + volume +
                 ", commission=" + commission +
                 ", accumulatedCouponYield=" + accumulatedCouponYield +
-                ", tradeTags=" + tradeTags +
+                ", asset=" + asset +
+                ", stageNumber=" + stageNumber +
                 '}';
     }
 
