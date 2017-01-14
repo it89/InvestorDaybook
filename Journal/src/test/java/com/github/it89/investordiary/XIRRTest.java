@@ -50,5 +50,12 @@ public class XIRRTest {
         cashFlow.put(LocalDate.of(2017, 5, 5), new BigDecimal("5500.32"));
         xirr = XIRR.getXIRR(cashFlow);
         assertEquals("Test", -164849, Math.round(xirr * 1000000));
+
+        cashFlow = new TreeMap<>();
+        cashFlow.put(LocalDate.of(2016, 1, 1), BigDecimal.valueOf(100));
+        cashFlow.put(LocalDate.of(2017, 1, 1), BigDecimal.valueOf(-1));
+        xirr = XIRR.getXIRR(cashFlow);
+        assertEquals("Test", -989873, Math.round(xirr * 1000000));
+
     }
 }
