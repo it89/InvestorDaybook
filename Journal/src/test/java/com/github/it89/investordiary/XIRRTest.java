@@ -25,18 +25,6 @@ public class XIRRTest {
         assertEquals("Test", 73577, Math.round(xirr * 1000000));
 
         cashFlow = new TreeMap<>();
-        cashFlow.put(LocalDate.of(2016, 1, 1), BigDecimal.valueOf(10000));
-        cashFlow.put(LocalDate.of(2017, 5, 5), BigDecimal.valueOf(11000));
-        xirr = XIRR.getXIRR(cashFlow);
-        assertTrue("Is negative infinity", Double.isInfinite(xirr));
-
-        cashFlow = new TreeMap<>();
-        cashFlow.put(LocalDate.of(2016, 1, 1), BigDecimal.valueOf(-10000));
-        cashFlow.put(LocalDate.of(2016, 1, 1), BigDecimal.valueOf(11000));
-        xirr = XIRR.getXIRR(cashFlow);
-        assertTrue("Is negative infinity", Double.isInfinite(xirr));
-
-        cashFlow = new TreeMap<>();
         cashFlow.put(LocalDate.of(2016, 1, 1), BigDecimal.valueOf(-10000));
         cashFlow.put(LocalDate.of(2016, 2, 1), BigDecimal.valueOf(4000));
         cashFlow.put(LocalDate.of(2016, 5, 11), BigDecimal.valueOf(-1000));
@@ -57,5 +45,23 @@ public class XIRRTest {
         xirr = XIRR.getXIRR(cashFlow);
         assertEquals("Test", -989873, Math.round(xirr * 1000000));
 
+        cashFlow = new TreeMap<>();
+        cashFlow.put(LocalDate.of(2016, 2, 24), new BigDecimal("-355.8"));
+        cashFlow.put(LocalDate.of(2016, 2, 29), new BigDecimal("-335.54"));
+        cashFlow.put(LocalDate.of(2016, 3, 7), new BigDecimal("575.42"));
+        xirr = XIRR.getXIRR(cashFlow);
+        assertEquals("Test", -999125, Math.round(xirr * 1000000));
+
+        cashFlow = new TreeMap<>();
+        cashFlow.put(LocalDate.of(2016, 1, 1), BigDecimal.valueOf(10000));
+        cashFlow.put(LocalDate.of(2017, 5, 5), BigDecimal.valueOf(11000));
+        xirr = XIRR.getXIRR(cashFlow);
+        assertTrue("Is negative infinity", Double.isInfinite(xirr));
+
+        cashFlow = new TreeMap<>();
+        cashFlow.put(LocalDate.of(2016, 1, 1), BigDecimal.valueOf(-10000));
+        cashFlow.put(LocalDate.of(2016, 1, 1), BigDecimal.valueOf(11000));
+        xirr = XIRR.getXIRR(cashFlow);
+        assertTrue("Is negative infinity", Double.isInfinite(xirr));
     }
 }

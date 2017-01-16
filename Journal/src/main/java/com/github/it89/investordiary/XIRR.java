@@ -15,8 +15,14 @@ public class XIRR {
 
     public static void main(String[] args) {
         TreeMap<LocalDate, BigDecimal> cashFlows = new TreeMap<>();
-        cashFlows.put(LocalDate.of(2016, 1, 1), new BigDecimal("100"));
+        /*cashFlows.put(LocalDate.of(2016, 1, 1), new BigDecimal("100"));
         cashFlows.put(LocalDate.of(2017, 1, 1), new BigDecimal("-1"));
+        System.out.println("XIRR = " + getXIRR(cashFlows));*/
+
+        cashFlows = new TreeMap<>();
+        cashFlows.put(LocalDate.of(2016, 2, 24), new BigDecimal("-355.8"));
+        cashFlows.put(LocalDate.of(2016, 2, 29), new BigDecimal("-335.54"));
+        cashFlows.put(LocalDate.of(2016, 3, 7), new BigDecimal("575.42"));
         System.out.println("XIRR = " + getXIRR(cashFlows));
     }
 
@@ -93,13 +99,13 @@ public class XIRR {
     private static double bisectionMethod(TreeMap<LocalDate, BigDecimal> cashFlows) {
         double leftBound = -1.0 + ACCURACY;
         double rightBound = 1.0;
-        double leftValue;
+        double leftValue = getSumF(cashFlows, leftBound);
         double rightValue = getSumF(cashFlows, rightBound);
         double xirr = Double.NaN;
         int seekCount;
 
         seekCount = 0;
-        while (rightValue < 0) {
+        while (rightValue * leftValue > 0) {
             leftBound = rightBound;
             rightBound = rightBound * 2;
             rightValue = getSumF(cashFlows, rightBound);
@@ -107,22 +113,24 @@ public class XIRR {
                 return Double.NaN;
         }
         leftValue = getSumF(cashFlows, leftBound);
+        if(leftValue == 0)
+            return leftBound;
+        if(rightValue == 0)
+            return rightBound;
 
-        if (leftValue < rightValue) {
-            double value;
-            seekCount = 0;
-            do {
-                if(seekCount++ > SEEK_COUNT_LIMIT_BISECTION)
-                    return Double.NaN;
-                xirr = (leftBound + rightBound) / 2;
-                value = getSumF(cashFlows, xirr);
-                if (value < 0)
-                    leftBound = xirr;
-                else
-                    rightBound = xirr;
-            } while (Math.abs(value) > ACCURACY);
+        double value;
+        seekCount = 0;
+        do {
+            if(seekCount++ > SEEK_COUNT_LIMIT_BISECTION)
+                return Double.NaN;
+            xirr = (leftBound + rightBound) / 2;
+            value = getSumF(cashFlows, xirr);
+            if (Math.signum(value) == Math.signum(leftValue))
+                leftBound = xirr;
+            else
+                rightBound = xirr;
+        } while (Math.abs(value) > ACCURACY);
 
-        }
         return xirr;
     }
 }
