@@ -65,7 +65,7 @@ public class LoaderXLS {
     public void loadAsset() {
         HSSFSheet sheet = exelBook.getSheet("Asset");
 
-        int rowNum = 0;
+        int rowNum = 1;
         HSSFRow row = sheet.getRow(rowNum);
         while(row != null) {
             HSSFCell cell = row.getCell(CELL_ASSET_TICKER);
@@ -89,7 +89,10 @@ public class LoaderXLS {
             HSSFCell cell = row.getCell(CELL_TRADE_ASSET_TICKER);
             if(cell == null)
                 break;
-            Asset asset = daybook.getAsset(cell.getStringCellValue());
+            String ticker = cell.getStringCellValue();
+            if(ticker.length() == 0)
+                break;
+            Asset asset = daybook.getAsset(ticker);
             boolean isAssetStock = (asset.getAssetType() == AssetType.STOCK);
 
             cell = row.getCell(CELL_TRADE_TRADE_NUMBER);
