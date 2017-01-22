@@ -1,5 +1,6 @@
 package com.github.it89.investordiary.backup.xls;
 
+import com.github.it89.investordiary.XIRR;
 import com.github.it89.investordiary.stockmarket.CashFlow;
 import com.github.it89.investordiary.stockmarket.TradeTag;
 import com.github.it89.investordiary.stockmarket.analysis.cashflow.CashFlowItem;
@@ -17,10 +18,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Created by Axel on 24.10.2016.
@@ -163,6 +161,7 @@ public class ReportXLS {
         row.createCell(6).setCellValue("Total profit taxed");
         row.createCell(7).setCellValue("Total paper profit not taxed");
         row.createCell(8).setCellValue("Total paper profit taxed");
+        row.createCell(9).setCellValue("Total paper profit XIRR");
 
         int rowNumber = 1;
         for(Map.Entry<LocalDate, ProfitHistoryItem> entry : profitHistory.getItems().entrySet()) {
@@ -183,19 +182,23 @@ public class ReportXLS {
             row.createCell(6).setCellValue(entry.getValue().getTotalProfitTaxed().doubleValue());
             row.createCell(7).setCellValue(entry.getValue().getTotalPaperProfitNotTaxed().doubleValue());
             row.createCell(8).setCellValue(entry.getValue().getTotalPaperProfitTaxed().doubleValue());
+            TreeMap<LocalDate, BigDecimal> cashFlows = entry.getValue().getCashFlows();
+            if(paperProfit != null) {
+                if(cashFlows.containsKey(entry.getKey()))
+                    cashFlows.put(entry.getKey(), paperProfit.add(cashFlows.get(entry.getKey())));
+                else
+                    cashFlows.put(entry.getKey(), paperProfit);
+            }
+
+            double xirr = XIRR.getXIRR(cashFlows);
+            if(Double.isFinite(xirr))
+                row.createCell(9).setCellValue(xirr);
 
             rowNumber++;
         }
 
-        sheet.autoSizeColumn(0);
-        sheet.autoSizeColumn(1);
-        sheet.autoSizeColumn(2);
-        sheet.autoSizeColumn(3);
-        sheet.autoSizeColumn(4);
-        sheet.autoSizeColumn(5);
-        sheet.autoSizeColumn(6);
-        sheet.autoSizeColumn(7);
-        sheet.autoSizeColumn(8);
+        for(int i = 0; i < 9; i++)
+            sheet.autoSizeColumn(i);
 
         book.write(new FileOutputStream(filename));
         book.close();

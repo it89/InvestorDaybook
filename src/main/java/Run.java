@@ -80,7 +80,7 @@ public class Run {
                                AssetPriceHistory assetPriceHistory,
                                BondNominalHistory bondNominalHistory) throws IOException {
         ProfitHistory profitHistory = new ProfitHistory(assetPriceHistory, bondNominalHistory);
-        Asset asset = daybook.getAsset("SNGSP");
+        Asset asset = daybook.getAsset("VTRS");
         int stageNumber = 1;
         profitHistory.fill(daybook, asset, stageNumber);
         ReportXLS.exportProfitHistory(profitHistory, "F:\\TMP\\ReportProfitHistory.xls");
