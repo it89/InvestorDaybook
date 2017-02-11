@@ -9,6 +9,7 @@ import java.util.HashMap;
  * Клиентский портфель.
  * Сейчас учитывается только прибыль, пополнений нет
  */
+@Deprecated
 public class StockPortfolio {
     /** Прибыль, с которой еще не удержан налог*/
     private BigDecimal sumProfitNotTaxed = new BigDecimal(0);

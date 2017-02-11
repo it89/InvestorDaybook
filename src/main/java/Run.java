@@ -5,9 +5,11 @@ import com.github.it89.investordiary.stockmarket.analysis.cashflow.CashFlowJourn
 import com.github.it89.investordiary.stockmarket.analysis.ProfitResult;
 import com.github.it89.investordiary.stockmarket.analysis.csv.LoadAssetPrice;
 import com.github.it89.investordiary.stockmarket.analysis.profithistory.ProfitHistory;
+import com.github.it89.investordiary.stockmarket.analysis.stockportfolio.StockPortfolioJournal;
 import com.github.it89.investordiary.stockmarket.analysis.tradejournal.TradeJournal;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -32,8 +34,9 @@ public class Run {
         tradeBondSet.addAll(daybook.getTradeBonds().values());
         BondNominalHistory bondNominalHistory = new BondNominalHistory(tradeBondSet);
 
-        profitHistory(daybook, assetPriceHistory, bondNominalHistory);
-
+        stockPortfolioJournal(daybook);
+        //profitHistory(daybook, assetPriceHistory, bondNominalHistory);
+        //profitResult(daybook, assetPriceHistory, bondNominalHistory);
     }
 
     private StockMarketDaybook loadStockMarketDaybook() throws IOException {
@@ -101,5 +104,15 @@ public class Run {
             }
         }
         ReportXLS.exportProfitResult(results, "F:\\TMP\\ReportProfitResult.xls");
+    }
+
+    private void stockPortfolioJournal(StockMarketDaybook daybook) {
+        StockPortfolioJournal journal = new StockPortfolioJournal();
+        TreeSet<Trade> trades = new TreeSet<Trade>();
+        trades.addAll(daybook.getTradeStocks().values());
+        trades.addAll(daybook.getTradeBonds().values());
+        trades = Trade.filterTreeSetByAsset(trades, daybook.getAsset("SNGSP"));
+        journal.addTrades(trades);
+        System.out.println(journal.getAmountSum(LocalDate.of(2016, 1, 1), LocalDate.of(2017, 1, 5)));
     }
 }
