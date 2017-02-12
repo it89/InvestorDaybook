@@ -1,8 +1,6 @@
 package com.github.it89.investordiary.backup.xls;
 
 import com.github.it89.investordiary.XIRR;
-import com.github.it89.investordiary.stockmarket.CashFlow;
-import com.github.it89.investordiary.stockmarket.TradeTag;
 import com.github.it89.investordiary.stockmarket.analysis.cashflow.CashFlowItem;
 import com.github.it89.investordiary.stockmarket.analysis.cashflow.CashFlowJournal;
 import com.github.it89.investordiary.stockmarket.analysis.ProfitResult;
@@ -225,13 +223,13 @@ public class ReportXLS {
             row.createCell(0).setCellValue(item.getAsset().getCaption());
             row.createCell(1).setCellValue(item.getStageNumber());
 
-            Date begin = Date.from(item.getBegin().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Date begin = Date.from(item.getDateBegin().atStartOfDay(ZoneId.systemDefault()).toInstant());
             Cell cell = row.createCell(2);
             cell.setCellStyle(dateStyle);
             cell.setCellValue(begin);
 
-            if(item.getEnd() != null) {
-                Date end = Date.from(item.getEnd().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            if(item.getDateEnd() != null) {
+                Date end = Date.from(item.getDateEnd().atStartOfDay(ZoneId.systemDefault()).toInstant());
                 cell = row.createCell(3);
                 cell.setCellStyle(dateStyle);
                 cell.setCellValue(end);

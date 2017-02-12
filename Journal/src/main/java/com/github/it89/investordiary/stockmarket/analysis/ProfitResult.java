@@ -1,8 +1,11 @@
 package com.github.it89.investordiary.stockmarket.analysis;
 
 import com.github.it89.investordiary.stockmarket.*;
+import com.github.it89.investordiary.stockmarket.analysis.cashflow.CashFlowItem;
+import com.github.it89.investordiary.stockmarket.analysis.cashflow.CashFlowJournal;
 import com.github.it89.investordiary.stockmarket.analysis.profithistory.ProfitHistory;
 import com.github.it89.investordiary.stockmarket.analysis.profithistory.ProfitHistoryItem;
+import com.github.it89.investordiary.stockmarket.analysis.stockportfolio.StockPortfolioJournal;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,69 +17,104 @@ import java.util.*;
  * Created by Axel on 04.12.2016.
  */
 public class ProfitResult implements Comparable<ProfitResult> {
-    private LocalDate begin;
-    private @Nullable LocalDate end;
-    private BigDecimal profitNotTaxed;
-    private BigDecimal profitTaxed;
-    private BigDecimal tax;
+    private LocalDate dateBegin;
+    private @Nullable LocalDate dateEnd;
+    private BigDecimal profitNotTaxed = BigDecimal.ZERO;
+    private BigDecimal profitTaxed = BigDecimal.ZERO;
+    private BigDecimal tax = BigDecimal.ZERO;
     private @Nullable Asset asset;
     private @Nullable Integer stageNumber;
 
-    public static TreeMap<Asset, TreeSet<Integer>> getAssetStageCombinations(StockMarketDaybook daybook) {
-        TreeMap<Asset, TreeSet<Integer>> result = new TreeMap<Asset, TreeSet<Integer>>();
-        for(Asset asset : daybook.getAssets().values()) {
-            TreeSet<Trade> trades = new TreeSet<Trade>();
-            if (asset.getAssetType().isBond())
-                trades.addAll((Collection<? extends Trade>) daybook.getTradeBonds().values());
-            else
-                trades.addAll((Collection<? extends Trade>) daybook.getTradeStocks().values());
-            trades = Trade.filterTreeSetByAsset(trades, asset);
-            TreeSet<Integer> stages = new TreeSet();
-            for(Trade trade : trades)
-                stages.add(trade.getStageNumber());
-            if(!stages.isEmpty())
-                result.put(asset, stages);
-        }
-        return result;
-    }
+    private ProfitResult() {}
 
+    @Deprecated
     public ProfitResult(ProfitHistory profitHistory) {
         TreeMap<LocalDate, ProfitHistoryItem> profitHistoryItems = profitHistory.getItems();
 
         if(profitHistoryItems.isEmpty()) {
             throw  new NullPointerException();
         }
-        begin = profitHistoryItems.firstKey();
-        end = profitHistoryItems.lastKey();
-        ProfitHistoryItem lastProfitHistoryItem = profitHistoryItems.get(end);
+        dateBegin = profitHistoryItems.firstKey();
+        dateEnd = profitHistoryItems.lastKey();
+        ProfitHistoryItem lastProfitHistoryItem = profitHistoryItems.get(dateEnd);
         if(!lastProfitHistoryItem.getAssetCount().isEmpty())
-            end = null;
+            dateEnd = null;
         profitNotTaxed = lastProfitHistoryItem.getTotalPaperProfitNotTaxed();
         profitTaxed = lastProfitHistoryItem.getTotalPaperProfitTaxed();
         tax = lastProfitHistoryItem.getSumTax();
     }
 
+    @Deprecated
     public ProfitResult(ProfitHistory profitHistory, Asset asset, int stageNumber) {
         this(profitHistory);
         this.asset = asset;
         this.stageNumber = stageNumber;
     }
 
-    public LocalDate getBegin() {
-        return begin;
+    public static TreeSet<ProfitResult> generateByCombinatons(StockMarketDaybook daybook) {
+        TreeSet<ProfitResult> results = new TreeSet<>();
+        TreeMap<Asset, TreeSet<Integer>> combinations = daybook.getAssetStageCombinations();
+        TreeSet<Trade> tradesAll = new TreeSet<>();
+        tradesAll.addAll(daybook.getTradeBonds().values());
+        tradesAll.addAll(daybook.getTradeStocks().values());
+        TreeSet<CashFlow> cashFlowsAll = new TreeSet<>();
+        cashFlowsAll.addAll(daybook.getCashFlows());
+
+        for(Map.Entry<Asset, TreeSet<Integer>> entry : combinations.entrySet()) {
+            Asset asset = entry.getKey();
+            TreeSet<Trade> tradesAsset = Trade.filterTreeSetByAsset(tradesAll, asset);
+            TreeSet<CashFlow> cashFlowsAsset = CashFlow.filterTreeSetByAsset(cashFlowsAll, asset);
+            for(Integer stageNumber : entry.getValue()) {
+                ProfitResult newItem = new ProfitResult();
+                newItem.asset = asset;
+                newItem.stageNumber = stageNumber;
+
+                CashFlowJournal cashFlowJournal = new CashFlowJournal();
+                TreeSet<Trade> trades = Trade.filterTreeSetByStageNumber(tradesAsset, stageNumber);
+                TreeSet<CashFlow> cashFlows = CashFlow.filterTreeSetByStageNumber(cashFlowsAsset, stageNumber);
+                cashFlowJournal.addTrades(trades);
+                cashFlowJournal.addCashFlows(cashFlows);
+
+                StockPortfolioJournal stockPortfolioJournal = new StockPortfolioJournal();
+                stockPortfolioJournal.addTrades(trades);
+                newItem.dateBegin = stockPortfolioJournal.getMinDate(asset, stageNumber);
+                long assetCount = stockPortfolioJournal.getAmountSum(asset, stageNumber, newItem.dateBegin, LocalDate.MAX);
+                if(assetCount == 0)
+                    newItem.dateEnd = stockPortfolioJournal.getMaxDate(asset, stageNumber);
+
+                newItem.calcCashFlow(cashFlowJournal);
+                results.add(newItem);
+            }
+        }
+        return results;
     }
 
-    public void setBegin(LocalDate begin) {
-        this.begin = begin;
+    private void calcCashFlow(CashFlowJournal cashFlowJournal) {
+        for(CashFlowItem cashFlowItem : cashFlowJournal.getItems()) {
+            if(cashFlowItem.getTax() == null)
+                profitNotTaxed = profitNotTaxed.add(cashFlowItem.getMoney());
+            else {
+                profitTaxed = profitTaxed.add(cashFlowItem.getMoney());
+                tax = tax.add(cashFlowItem.getTax());
+            }
+        }
+    }
+
+    public LocalDate getDateBegin() {
+        return dateBegin;
+    }
+
+    public void setDateBegin(LocalDate dateBegin) {
+        this.dateBegin = dateBegin;
     }
 
     @Nullable
-    public LocalDate getEnd() {
-        return end;
+    public LocalDate getDateEnd() {
+        return dateEnd;
     }
 
-    public void setEnd(@Nullable LocalDate end) {
-        this.end = end;
+    public void setDateEnd(@Nullable LocalDate dateEnd) {
+        this.dateEnd = dateEnd;
     }
 
     public BigDecimal getProfitNotTaxed() {
@@ -124,8 +162,8 @@ public class ProfitResult implements Comparable<ProfitResult> {
     @Override
     public String toString() {
         return "ProfitResult{" +
-                "begin=" + begin +
-                ", end=" + end +
+                "dateBegin=" + dateBegin +
+                ", dateEnd=" + dateEnd +
                 ", profitNotTaxed=" + profitNotTaxed +
                 ", profitTaxed=" + profitTaxed +
                 ", tax=" + tax +
@@ -135,11 +173,11 @@ public class ProfitResult implements Comparable<ProfitResult> {
     }
 
     public int compareTo(@NotNull ProfitResult o) {
-        if(end == null && o.end != null)
+        if(dateEnd == null && o.dateEnd != null)
             return 1;
-        else if(end != null && o.end == null)
+        else if(dateEnd != null && o.dateEnd == null)
             return -1;
-        int result = begin.compareTo(o.begin);
+        int result = dateBegin.compareTo(o.dateBegin);
         if(result != 0)
             return result;
         if(asset != null)

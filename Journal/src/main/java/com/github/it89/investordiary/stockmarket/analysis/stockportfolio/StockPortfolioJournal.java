@@ -1,5 +1,6 @@
 package com.github.it89.investordiary.stockmarket.analysis.stockportfolio;
 
+import com.github.it89.investordiary.stockmarket.Asset;
 import com.github.it89.investordiary.stockmarket.Trade;
 import com.github.it89.investordiary.stockmarket.TradeOperation;
 
@@ -25,13 +26,36 @@ public class StockPortfolioJournal {
             add(trade);
     }
 
-    public long getAmountSum(LocalDate dateFrom, LocalDate dateTo) {
+    public long getAmountSum(Asset asset, int stageNumber, LocalDate dateFrom, LocalDate dateTo) {
         long amount = 0;
         for(StockPortfolioItem item : items) {
-            if(item.getDate().compareTo(dateFrom) >= 0 && item.getDate().compareTo(dateTo) <= 0) {
+            if(item.getDate().compareTo(dateFrom) >= 0
+                    && item.getDate().compareTo(dateTo) <= 0
+                    && item.getAsset() == asset
+                    && item.getStageNumber() == stageNumber) {
                 amount += item.getAmount();
             }
         }
         return amount;
+    }
+
+    public LocalDate getMinDate(Asset asset, int stageNumber) {
+        for(StockPortfolioItem item : items) {
+            if(item.getAsset() == asset && item.getStageNumber() == stageNumber) {
+                return item.getDate();
+            }
+        }
+        return LocalDate.MAX;
+    }
+
+    public LocalDate getMaxDate(Asset asset, int stageNumber) {
+        LocalDate maxDate = LocalDate.MIN;
+        for(StockPortfolioItem item : items) {
+            if(item.getAsset() == asset && item.getStageNumber() == stageNumber)
+                maxDate = item.getDate();
+            else if(maxDate != LocalDate.MIN)
+                break;
+        }
+        return maxDate;
     }
 }

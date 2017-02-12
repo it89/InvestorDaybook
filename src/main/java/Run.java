@@ -26,17 +26,18 @@ public class Run {
     private void run() throws IOException {
         StockMarketDaybook daybook = loadStockMarketDaybook();
 
-        cashFlowJournal(daybook);
-        tradeJournal(daybook);
-        AssetPriceHistory assetPriceHistory = assetPriceHistory(daybook);
+        //cashFlowJournal(daybook);
+        //tradeJournal(daybook);
+        //AssetPriceHistory assetPriceHistory = assetPriceHistory(daybook);
 
-        TreeSet<TradeBond> tradeBondSet = new TreeSet();
-        tradeBondSet.addAll(daybook.getTradeBonds().values());
-        BondNominalHistory bondNominalHistory = new BondNominalHistory(tradeBondSet);
+        //TreeSet<TradeBond> tradeBondSet = new TreeSet();
+        //tradeBondSet.addAll(daybook.getTradeBonds().values());
+        //BondNominalHistory bondNominalHistory = new BondNominalHistory(tradeBondSet);
 
-        stockPortfolioJournal(daybook);
+        //stockPortfolioJournal(daybook);
         //profitHistory(daybook, assetPriceHistory, bondNominalHistory);
         //profitResult(daybook, assetPriceHistory, bondNominalHistory);
+        profitResult(daybook);
     }
 
     private StockMarketDaybook loadStockMarketDaybook() throws IOException {
@@ -92,7 +93,7 @@ public class Run {
     private void profitResult(StockMarketDaybook daybook,
                               AssetPriceHistory assetPriceHistory,
                               BondNominalHistory bondNominalHistory) throws IOException {
-        TreeMap<Asset, TreeSet<Integer>> combinations = ProfitResult.getAssetStageCombinations(daybook);
+        /*TreeMap<Asset, TreeSet<Integer>> combinations = ProfitResult.getAssetStageCombinations(daybook);
         TreeSet<ProfitResult> results = new TreeSet<ProfitResult>();
         for(Map.Entry<Asset, TreeSet<Integer>> entry : combinations.entrySet()) {
             for(Integer stageNumber : entry.getValue()) {
@@ -103,16 +104,22 @@ public class Run {
                 results.add(new ProfitResult(profitHistory, entry.getKey(), stageNumber));
             }
         }
-        ReportXLS.exportProfitResult(results, "F:\\TMP\\ReportProfitResult.xls");
+        ReportXLS.exportProfitResult(results, "F:\\TMP\\ReportProfitResult.xls");*/
     }
 
     private void stockPortfolioJournal(StockMarketDaybook daybook) {
-        StockPortfolioJournal journal = new StockPortfolioJournal();
+        /*StockPortfolioJournal journal = new StockPortfolioJournal();
         TreeSet<Trade> trades = new TreeSet<Trade>();
         trades.addAll(daybook.getTradeStocks().values());
         trades.addAll(daybook.getTradeBonds().values());
         trades = Trade.filterTreeSetByAsset(trades, daybook.getAsset("SNGSP"));
         journal.addTrades(trades);
-        System.out.println(journal.getAmountSum(LocalDate.of(2016, 1, 1), LocalDate.of(2017, 1, 5)));
+        System.out.println(journal.getAmountSum(LocalDate.of(2016, 1, 1), LocalDate.of(2017, 1, 5)));*/
+    }
+
+    private void profitResult(StockMarketDaybook daybook) {
+        TreeSet<ProfitResult> results = ProfitResult.generateByCombinatons(daybook);
+        for(ProfitResult result : results)
+            System.out.println(result);
     }
 }
