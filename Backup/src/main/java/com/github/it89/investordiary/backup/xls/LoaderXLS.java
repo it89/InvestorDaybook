@@ -8,6 +8,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalTime;
@@ -46,6 +47,9 @@ public class LoaderXLS {
     private static final int CELL_CASH_FLOW_TYPE = 4;
     private static final int CELL_CASH_FLOW_ASSET_TICKER = 5;
     private static final int CELL_CASH_FLOW_STAGE_NUMBER = 6;
+
+    private static final int CELL_PORTFOLIO_COST = 14;
+    private static final int CELL_PORTFOLIO_ASSET_TICKER = 16;
 
     public LoaderXLS(StockMarketDaybook stockMarketDaybook, String filename) {
         this.daybook = stockMarketDaybook;
@@ -220,5 +224,38 @@ public class LoaderXLS {
         if(comment.indexOf("налог не удерживается") >= 0)
             return new BigDecimal(0);
         return null;
+    }
+
+    public HashMap<Asset, BigDecimal> getPortfolioCostMap() throws IOException {
+        exelBook = new HSSFWorkbook(new FileInputStream(filename));
+        HSSFSheet sheet = exelBook.getSheet("Portfolio");
+        HashMap<Asset, BigDecimal> portfolio = new HashMap<Asset, BigDecimal>();
+
+        int rowNum = 1;
+        HSSFRow row = sheet.getRow(rowNum);
+        while(row != null) {
+            HSSFCell cell = row.getCell(0);
+            if (cell == null)
+                break;
+            cell = row.getCell(CELL_PORTFOLIO_ASSET_TICKER);
+            if(cell == null) {
+                row = sheet.getRow(++rowNum);
+                continue;
+            }
+            String ticker = cell.getStringCellValue();
+            if(ticker.length() == 0){
+                row = sheet.getRow(++rowNum);
+                continue;
+            }
+            Asset asset = daybook.getAsset(ticker);
+            cell = row.getCell(CELL_PORTFOLIO_COST);
+            cell.setCellType(Cell.CELL_TYPE_STRING);
+            String test = cell.getStringCellValue();
+            portfolio.put(asset, new BigDecimal(cell.getStringCellValue()));
+
+            row = sheet.getRow(++rowNum);
+        }
+        exelBook.close();
+        return portfolio;
     }
 }

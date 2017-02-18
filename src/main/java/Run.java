@@ -9,7 +9,9 @@ import com.github.it89.investordiary.stockmarket.analysis.stockportfolio.StockPo
 import com.github.it89.investordiary.stockmarket.analysis.tradejournal.TradeJournal;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -38,6 +40,7 @@ public class Run {
         //profitHistory(daybook, assetPriceHistory, bondNominalHistory);
         //profitResult(daybook, assetPriceHistory, bondNominalHistory);
         profitResult(daybook);
+        //portfolioCostMap(daybook);
     }
 
     private StockMarketDaybook loadStockMarketDaybook() throws IOException {
@@ -121,5 +124,15 @@ public class Run {
         TreeSet<ProfitResult> results = ProfitResult.generateByCombinatons(daybook);
         for(ProfitResult result : results)
             System.out.println(result);
+    }
+
+    private void portfolioCostMap(StockMarketDaybook daybook) throws IOException {
+        String testFileXLS = "F:\\TMP\\Daybook.xls";
+        LoaderXLS loader = new LoaderXLS(daybook, testFileXLS);
+        HashMap<Asset, BigDecimal> portfolio = loader.getPortfolioCostMap();
+        for(Map.Entry<Asset, BigDecimal> entry : portfolio.entrySet()) {
+            System.out.println(entry.getKey());
+            System.out.println(entry.getValue());
+        }
     }
 }
