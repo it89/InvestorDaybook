@@ -120,8 +120,12 @@ public class Run {
         System.out.println(journal.getAmountSum(LocalDate.of(2016, 1, 1), LocalDate.of(2017, 1, 5)));*/
     }
 
-    private void profitResult(StockMarketDaybook daybook) {
-        TreeSet<ProfitResult> results = ProfitResult.generateByCombinatons(daybook);
+    private void profitResult(StockMarketDaybook daybook) throws IOException {
+        String testFileXLS = "F:\\TMP\\Daybook.xls";
+        LoaderXLS loader = new LoaderXLS(daybook, testFileXLS);
+        HashMap<Asset, BigDecimal> portfolio = loader.getPortfolioCostMap();
+
+        TreeSet<ProfitResult> results = ProfitResult.generateByCombinatons(daybook, portfolio);
         for(ProfitResult result : results)
             System.out.println(result);
     }

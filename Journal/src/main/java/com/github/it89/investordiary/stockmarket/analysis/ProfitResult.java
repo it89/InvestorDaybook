@@ -22,6 +22,7 @@ public class ProfitResult implements Comparable<ProfitResult> {
     private BigDecimal profitNotTaxed = BigDecimal.ZERO;
     private BigDecimal profitTaxed = BigDecimal.ZERO;
     private BigDecimal tax = BigDecimal.ZERO;
+    private BigDecimal position = BigDecimal.ZERO;
     private @Nullable Asset asset;
     private @Nullable Integer stageNumber;
 
@@ -51,7 +52,8 @@ public class ProfitResult implements Comparable<ProfitResult> {
         this.stageNumber = stageNumber;
     }
 
-    public static TreeSet<ProfitResult> generateByCombinatons(StockMarketDaybook daybook) {
+    public static TreeSet<ProfitResult> generateByCombinatons(StockMarketDaybook daybook,
+                                                              HashMap<Asset, BigDecimal> portfolio) {
         TreeSet<ProfitResult> results = new TreeSet<>();
         TreeMap<Asset, TreeSet<Integer>> combinations = daybook.getAssetStageCombinations();
         TreeSet<Trade> tradesAll = new TreeSet<>();
@@ -81,6 +83,8 @@ public class ProfitResult implements Comparable<ProfitResult> {
                 long assetCount = stockPortfolioJournal.getAmountSum(asset, stageNumber, newItem.dateBegin, LocalDate.MAX);
                 if(assetCount == 0)
                     newItem.dateEnd = stockPortfolioJournal.getMaxDate(asset, stageNumber);
+                else
+                    newItem.calcPosition(portfolio);
 
                 newItem.calcCashFlow(cashFlowJournal);
                 results.add(newItem);
@@ -96,6 +100,14 @@ public class ProfitResult implements Comparable<ProfitResult> {
             else {
                 profitTaxed = profitTaxed.add(cashFlowItem.getMoney());
                 tax = tax.add(cashFlowItem.getTax());
+            }
+        }
+    }
+
+    private void calcPosition(HashMap<Asset, BigDecimal> portfolio) {
+        if(dateEnd == null) {
+            if(portfolio.containsKey(asset)) {
+                position = portfolio.get(asset);
             }
         }
     }
@@ -159,6 +171,14 @@ public class ProfitResult implements Comparable<ProfitResult> {
         this.stageNumber = stageNumber;
     }
 
+    public BigDecimal getPosition() {
+        return position;
+    }
+
+    public void setPosition(BigDecimal position) {
+        this.position = position;
+    }
+
     @Override
     public String toString() {
         return "ProfitResult{" +
@@ -167,6 +187,7 @@ public class ProfitResult implements Comparable<ProfitResult> {
                 ", profitNotTaxed=" + profitNotTaxed +
                 ", profitTaxed=" + profitTaxed +
                 ", tax=" + tax +
+                ", position=" + position +
                 ", asset=" + asset +
                 ", stageNumber=" + stageNumber +
                 '}';
