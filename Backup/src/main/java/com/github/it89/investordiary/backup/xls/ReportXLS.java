@@ -216,6 +216,10 @@ public class ReportXLS {
         row.createCell(2).setCellValue("Begin");
         row.createCell(3).setCellValue("End");
         row.createCell(4).setCellValue("Profit not taxed");
+        row.createCell(5).setCellValue("Profit taxed");
+        row.createCell(6).setCellValue("Profit tax");
+        row.createCell(7).setCellValue("Profit position");
+        row.createCell(8).setCellValue("Result");
 
         int rowNumber = 1;
         for(ProfitResult item : items) {
@@ -235,14 +239,21 @@ public class ReportXLS {
                 cell.setCellValue(end);
             }
 
-            row.createCell(4).setCellValue(item.getProfitNotTaxed().doubleValue());
+            BigDecimal profitNotTaxed = item.getProfitNotTaxed();
+            BigDecimal profitTaxed = item.getProfitTaxed();
+            BigDecimal tax = item.getTax();
+            BigDecimal position = item.getPosition();
+            BigDecimal result = item.getProfitNotTaxed().add(item.getProfitTaxed()).subtract(tax).add(position);
+
+            row.createCell(4).setCellValue(profitNotTaxed.doubleValue());
+            row.createCell(5).setCellValue(profitTaxed.doubleValue());
+            row.createCell(6).setCellValue(tax.doubleValue());
+            row.createCell(7).setCellValue(position.doubleValue());
+            row.createCell(8).setCellValue(result.doubleValue());
             rowNumber++;
         }
-        sheet.autoSizeColumn(0);
-        sheet.autoSizeColumn(1);
-        sheet.autoSizeColumn(2);
-        sheet.autoSizeColumn(3);
-        sheet.autoSizeColumn(4);
+        for(int i = 0; i <= 8; i++)
+            sheet.autoSizeColumn(i);
 
         book.write(new FileOutputStream(filename));
         book.close();

@@ -126,8 +126,9 @@ public class Run {
         HashMap<Asset, BigDecimal> portfolio = loader.getPortfolioCostMap();
 
         TreeSet<ProfitResult> results = ProfitResult.generateByCombinatons(daybook, portfolio);
-        for(ProfitResult result : results)
-            System.out.println(result);
+        /*for(ProfitResult result : results)
+            System.out.println(result);*/
+        ReportXLS.exportProfitResult(results, "F:\\TMP\\ReportProfitResult.xls");
     }
 
     private void portfolioCostMap(StockMarketDaybook daybook) throws IOException {
