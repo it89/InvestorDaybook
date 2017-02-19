@@ -3,6 +3,7 @@ package com.github.it89.investordiary.backup.xls;
 import com.github.it89.investordiary.stockmarket.Asset;
 import com.github.it89.investordiary.stockmarket.StockMarketDaybook;
 import com.github.it89.investordiary.stockmarket.bondpayment.BondPayment;
+import com.github.it89.investordiary.stockmarket.bondpayment.BondRedemption;
 import com.github.it89.investordiary.stockmarket.bondpayment.CouponPayment;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -31,6 +32,8 @@ public class BondPaymentLoader {
     private final int COLL_COUPON_RATE = 2;
     private final int COLL_COUPON_PCT = 3;
     private final int COLL_COUPON_PAYMENT = 4;
+    private final int COLL_BOND_DEDEMPTION_PCT = 5;
+    private final int COLL_BOND_DEDEMPTION_PAYMENT = 6;
 
     public BondPaymentLoader(StockMarketDaybook daybook, String filename) {
         this.daybook = daybook;
@@ -55,7 +58,7 @@ public class BondPaymentLoader {
         return assetBondPayments;
     }
 
-    @org.jetbrains.annotations.Nullable
+    @Nullable
     private Asset findAssetByCaption(HashSet<Asset> assets, String assetCaption) {
         for(Asset asset : assets) {
             if(asset.getCaption().equals(assetCaption))
@@ -71,7 +74,7 @@ public class BondPaymentLoader {
         while(row != null) {
             if(hasRowExists(row) == false)
                 break;
-            bondPayments.add(new BondPayment(getDate(row), getCouponPayment(row), null));
+            bondPayments.add(new BondPayment(getDate(row), getCouponPayment(row), getBondRedemption(row)));
             row = sheet.getRow(++rowNum);
         }
         return bondPayments;
@@ -95,7 +98,7 @@ public class BondPaymentLoader {
         return localDate;
     }
 
-    @org.jetbrains.annotations.Nullable
+    @Nullable
     private CouponPayment getCouponPayment(XSSFRow row) {
         BigDecimal payment = parseStringToBigDecimal(row.getCell(COLL_COUPON_PAYMENT).getStringCellValue());
         if(payment == null)
@@ -103,6 +106,15 @@ public class BondPaymentLoader {
         BigDecimal couponRate = parseStringToBigDecimal(row.getCell(COLL_COUPON_RATE).getStringCellValue());
         BigDecimal pct = parseStringToBigDecimal(row.getCell(COLL_COUPON_PCT).getStringCellValue());
         return new CouponPayment(couponRate, pct, payment);
+    }
+
+    @Nullable
+    private BondRedemption getBondRedemption(XSSFRow row) {
+        BigDecimal payment = parseStringToBigDecimal(row.getCell(COLL_BOND_DEDEMPTION_PAYMENT).getStringCellValue());
+        if(payment == null)
+            return null;
+        BigDecimal pct = parseStringToBigDecimal(row.getCell(COLL_BOND_DEDEMPTION_PCT).getStringCellValue());
+        return new BondRedemption(pct, payment);
     }
 
     @Nullable
