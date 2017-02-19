@@ -1,3 +1,4 @@
+import com.github.it89.investordiary.backup.xls.BondPaymentLoader;
 import com.github.it89.investordiary.backup.xls.LoaderXLS;
 import com.github.it89.investordiary.backup.xls.ReportXLS;
 import com.github.it89.investordiary.stockmarket.*;
@@ -7,14 +8,12 @@ import com.github.it89.investordiary.stockmarket.analysis.csv.LoadAssetPrice;
 import com.github.it89.investordiary.stockmarket.analysis.profithistory.ProfitHistory;
 import com.github.it89.investordiary.stockmarket.analysis.stockportfolio.StockPortfolioJournal;
 import com.github.it89.investordiary.stockmarket.analysis.tradejournal.TradeJournal;
+import com.github.it89.investordiary.stockmarket.bondpayment.BondPaymentSchedule;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Created by Axel on 17.09.2016.
@@ -39,8 +38,9 @@ public class Run {
         //stockPortfolioJournal(daybook);
         //profitHistory(daybook, assetPriceHistory, bondNominalHistory);
         //profitResult(daybook, assetPriceHistory, bondNominalHistory);
-        profitResult(daybook);
+        //profitResult(daybook);
         //portfolioCostMap(daybook);
+        bondPayment(daybook);
     }
 
     private StockMarketDaybook loadStockMarketDaybook() throws IOException {
@@ -139,5 +139,11 @@ public class Run {
             System.out.println(entry.getKey());
             System.out.println(entry.getValue());
         }
+    }
+
+    private void bondPayment(StockMarketDaybook daybook) throws IOException {
+        String fileXLSX = "F:\\TMP\\BondPays.xlsx";
+        BondPaymentLoader loader = new BondPaymentLoader(daybook, fileXLSX);
+        HashSet<BondPaymentSchedule> schedules = loader.load();
     }
 }

@@ -70,7 +70,7 @@ public class ReportXLS {
         row.createCell(3).setCellValue("Amount");
         row.createCell(4).setCellValue("Volume");
         row.createCell(5).setCellValue("Commission");
-        row.createCell(6).setCellValue("Accumulated Coupon Yield");
+        row.createCell(6).setCellValue("Accumulated CouponPayment Yield");
         row.createCell(7).setCellValue("Total Profit");
         row.createCell(8).setCellValue("Tax");
         row.createCell(9).setCellValue("Stage number");
