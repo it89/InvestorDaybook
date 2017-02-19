@@ -6,13 +6,11 @@ import com.github.it89.investordiary.stockmarket.analysis.cashflow.CashFlowJourn
 import com.github.it89.investordiary.stockmarket.analysis.ProfitResult;
 import com.github.it89.investordiary.stockmarket.analysis.csv.LoadAssetPrice;
 import com.github.it89.investordiary.stockmarket.analysis.profithistory.ProfitHistory;
-import com.github.it89.investordiary.stockmarket.analysis.stockportfolio.StockPortfolioJournal;
 import com.github.it89.investordiary.stockmarket.analysis.tradejournal.TradeJournal;
-import com.github.it89.investordiary.stockmarket.bondpayment.BondPaymentSchedule;
+import com.github.it89.investordiary.stockmarket.bondpayment.BondPayment;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -144,6 +142,7 @@ public class Run {
     private void bondPayment(StockMarketDaybook daybook) throws IOException {
         String fileXLSX = "F:\\TMP\\BondPays.xlsx";
         BondPaymentLoader loader = new BondPaymentLoader(daybook, fileXLSX);
-        HashSet<BondPaymentSchedule> schedules = loader.load();
+        HashMap<Asset, TreeSet<BondPayment>> assetBondPayments = loader.load();
+        int i = 0;
     }
 }

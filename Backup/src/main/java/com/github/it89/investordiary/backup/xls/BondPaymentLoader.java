@@ -3,9 +3,7 @@ package com.github.it89.investordiary.backup.xls;
 import com.github.it89.investordiary.stockmarket.Asset;
 import com.github.it89.investordiary.stockmarket.StockMarketDaybook;
 import com.github.it89.investordiary.stockmarket.bondpayment.BondPayment;
-import com.github.it89.investordiary.stockmarket.bondpayment.BondPaymentSchedule;
 import com.github.it89.investordiary.stockmarket.bondpayment.CouponPayment;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -16,10 +14,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.TreeSet;
 
 /**
  * Created by Axel on 19.02.2017.
@@ -28,7 +26,7 @@ public class BondPaymentLoader {
     private final StockMarketDaybook daybook;
     private final String filename;
 
-    private final int ROW_NUM_FIRST = 4;
+    private final int ROW_NUM_FIRST = 3;
     private final int COLL_DATE = 1;
     private final int COLL_COUPON_RATE = 2;
     private final int COLL_COUPON_PCT = 3;
@@ -39,8 +37,8 @@ public class BondPaymentLoader {
         this.filename = filename;
     }
 
-    public HashSet<BondPaymentSchedule> load() throws IOException {
-        HashSet<BondPaymentSchedule> shedules = new HashSet<BondPaymentSchedule>();
+    public HashMap<Asset, TreeSet<BondPayment>> load() throws IOException {
+        HashMap<Asset, TreeSet<BondPayment>> assetBondPayments = new HashMap();
         XSSFWorkbook exelBook = exelBook = new XSSFWorkbook(new FileInputStream(filename));
         HashSet<Asset> assets = new HashSet<Asset>();
         assets.addAll(daybook.getAssets().values());
@@ -50,11 +48,11 @@ public class BondPaymentLoader {
             XSSFSheet sheet = exelBook.getSheetAt(sheetNumber);
             Asset asset = findAssetByCaption(assets, sheet.getSheetName());
             if(asset != null) {
-                shedules.add(loadBondPaymentSchedule(asset, sheet));
+                assetBondPayments.put(asset, loadBondPayments(sheet));
             }
         }
         exelBook.close();
-        return shedules;
+        return assetBondPayments;
     }
 
     @org.jetbrains.annotations.Nullable
@@ -66,17 +64,17 @@ public class BondPaymentLoader {
         return null;
     }
 
-    private BondPaymentSchedule loadBondPaymentSchedule(Asset asset, XSSFSheet sheet) {
-        BondPaymentSchedule schedule = new BondPaymentSchedule(asset);
+    private TreeSet<BondPayment> loadBondPayments(XSSFSheet sheet) {
+        TreeSet<BondPayment> bondPayments = new TreeSet();
         int rowNum = ROW_NUM_FIRST;
         XSSFRow row = sheet.getRow(rowNum);
         while(row != null) {
             if(hasRowExists(row) == false)
                 break;
-            schedule.bondPayments.add(new BondPayment(getDate(row), getCouponPayment(row), null));
+            bondPayments.add(new BondPayment(getDate(row), getCouponPayment(row), null));
             row = sheet.getRow(++rowNum);
         }
-        return schedule;
+        return bondPayments;
     }
 
     private boolean hasRowExists(XSSFRow row) {
