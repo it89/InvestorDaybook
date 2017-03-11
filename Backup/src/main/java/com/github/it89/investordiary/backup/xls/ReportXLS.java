@@ -223,39 +223,51 @@ public class ReportXLS {
 
         int rowNumber = 1;
         for(ProfitResult item : items) {
-            row = sheet.createRow(rowNumber);
-            row.createCell(0).setCellValue(item.getAsset().getCaption());
-            row.createCell(1).setCellValue(item.getStageNumber());
-
-            Date begin = Date.from(item.getDateBegin().atStartOfDay(ZoneId.systemDefault()).toInstant());
-            Cell cell = row.createCell(2);
-            cell.setCellStyle(dateStyle);
-            cell.setCellValue(begin);
-
-            if(item.getDateEnd() != null) {
-                Date end = Date.from(item.getDateEnd().atStartOfDay(ZoneId.systemDefault()).toInstant());
-                cell = row.createCell(3);
-                cell.setCellStyle(dateStyle);
-                cell.setCellValue(end);
+            if(!item.getAsset().getAssetType().isBond()) {
+                exportRowProfitResult(item, row, sheet, rowNumber, dateStyle);
+                rowNumber++;
             }
-
-            BigDecimal profitNotTaxed = item.getProfitNotTaxed();
-            BigDecimal profitTaxed = item.getProfitTaxed();
-            BigDecimal tax = item.getTax();
-            BigDecimal position = item.getPosition();
-            BigDecimal result = item.getProfitNotTaxed().add(item.getProfitTaxed()).subtract(tax).add(position);
-
-            row.createCell(4).setCellValue(profitNotTaxed.doubleValue());
-            row.createCell(5).setCellValue(profitTaxed.doubleValue());
-            row.createCell(6).setCellValue(tax.doubleValue());
-            row.createCell(7).setCellValue(position.doubleValue());
-            row.createCell(8).setCellValue(result.doubleValue());
-            rowNumber++;
+        }
+        for(ProfitResult item : items) {
+            if(item.getAsset().getAssetType().isBond()) {
+                exportRowProfitResult(item, row, sheet, rowNumber, dateStyle);
+                rowNumber++;
+            }
         }
         for(int i = 0; i <= 8; i++)
             sheet.autoSizeColumn(i);
 
         book.write(new FileOutputStream(filename));
         book.close();
+    }
+
+    private static void exportRowProfitResult(ProfitResult item, Row row, Sheet sheet, int rowNumber, CellStyle dateStyle) {
+        row = sheet.createRow(rowNumber);
+        row.createCell(0).setCellValue(item.getAsset().getCaption());
+        row.createCell(1).setCellValue(item.getStageNumber());
+
+        Date begin = Date.from(item.getDateBegin().atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Cell cell = row.createCell(2);
+        cell.setCellStyle(dateStyle);
+        cell.setCellValue(begin);
+
+        if(item.getDateEnd() != null) {
+            Date end = Date.from(item.getDateEnd().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            cell = row.createCell(3);
+            cell.setCellStyle(dateStyle);
+            cell.setCellValue(end);
+        }
+
+        BigDecimal profitNotTaxed = item.getProfitNotTaxed();
+        BigDecimal profitTaxed = item.getProfitTaxed();
+        BigDecimal tax = item.getTax();
+        BigDecimal position = item.getPosition();
+        BigDecimal result = item.getProfitNotTaxed().add(item.getProfitTaxed()).subtract(tax).add(position);
+
+        row.createCell(4).setCellValue(profitNotTaxed.doubleValue());
+        row.createCell(5).setCellValue(profitTaxed.doubleValue());
+        row.createCell(6).setCellValue(tax.doubleValue());
+        row.createCell(7).setCellValue(position.doubleValue());
+        row.createCell(8).setCellValue(result.doubleValue());
     }
 }
