@@ -36,9 +36,9 @@ public class Run {
         //stockPortfolioJournal(daybook);
         //profitHistory(daybook, assetPriceHistory, bondNominalHistory);
         //profitResult(daybook, assetPriceHistory, bondNominalHistory);
-        //profitResult(daybook);
+        profitResult(daybook);
         //portfolioCostMap(daybook);
-        bondPayment(daybook);
+        //bondPayment(daybook);
     }
 
     private StockMarketDaybook loadStockMarketDaybook() throws IOException {

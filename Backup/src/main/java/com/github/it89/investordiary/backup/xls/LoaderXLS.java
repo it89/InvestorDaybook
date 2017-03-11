@@ -6,6 +6,7 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -50,6 +51,7 @@ public class LoaderXLS {
 
     private static final int CELL_PORTFOLIO_COST = 14;
     private static final int CELL_PORTFOLIO_ASSET_TICKER = 16;
+    private static final int CELL_PORTFOLIO_ACCUMULATED_COUPON = 12;
 
     public LoaderXLS(StockMarketDaybook stockMarketDaybook, String filename) {
         this.daybook = stockMarketDaybook;
@@ -213,6 +215,8 @@ public class LoaderXLS {
         }
     }
 
+    @Deprecated
+    // TODO: Вместо этой функции нужно указывать налог явно в файле
     public static BigDecimal getCashFlowTaxByComment(String comment) {
         final String TEXT_FIND_TAX = "налог к удержанию";
         int textTaxIndex = comment.indexOf(TEXT_FIND_TAX);
@@ -223,6 +227,14 @@ public class LoaderXLS {
         }
         if(comment.indexOf("налог не удерживается") >= 0)
             return new BigDecimal(0);
+        // TODO: refactoring
+        /*final String TEXT_FIND_TAX2 = "налог";
+        textTaxIndex = comment.indexOf(TEXT_FIND_TAX2);
+        if(textTaxIndex >= 0) {
+            String taxString = comment.substring(textTaxIndex + TEXT_FIND_TAX2.length() + 1);
+            taxString = taxString.substring(0, taxString.indexOf(' '));
+            return new BigDecimal(taxString);
+        }*/
         return null;
     }
 
@@ -250,8 +262,15 @@ public class LoaderXLS {
             Asset asset = daybook.getAsset(ticker);
             cell = row.getCell(CELL_PORTFOLIO_COST);
             cell.setCellType(Cell.CELL_TYPE_STRING);
-            String test = cell.getStringCellValue();
-            portfolio.put(asset, new BigDecimal(cell.getStringCellValue()));
+            BigDecimal cost = new BigDecimal(cell.getStringCellValue());
+
+            cell = row.getCell(CELL_PORTFOLIO_ACCUMULATED_COUPON);
+            cell.setCellType(Cell.CELL_TYPE_STRING);
+            String cellText = cell.getStringCellValue();
+            if(!cellText.isEmpty())
+                cost = cost.add(new BigDecimal(cellText));
+
+            portfolio.put(asset, cost);
 
             row = sheet.getRow(++rowNum);
         }
