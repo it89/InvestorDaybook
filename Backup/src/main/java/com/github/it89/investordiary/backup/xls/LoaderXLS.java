@@ -48,6 +48,8 @@ public class LoaderXLS {
     private static final int CELL_CASH_FLOW_TYPE = 4;
     private static final int CELL_CASH_FLOW_ASSET_TICKER = 5;
     private static final int CELL_CASH_FLOW_STAGE_NUMBER = 6;
+    private static final int CELL_CASH_FLOW_TAX = 7;
+    private static final int CELL_CASH_FLOW_EBT = 8;
 
     private static final int CELL_PORTFOLIO_COST = 14;
     private static final int CELL_PORTFOLIO_ASSET_TICKER = 16;
@@ -185,17 +187,33 @@ public class LoaderXLS {
             String typeCode = null;
             if(cell != null) {
                 typeCode = cell.getStringCellValue();
+                if(typeCode != null)
+                    typeCode = typeCode.trim();
             }
-            if(typeCode != null) {
+            if(typeCode != null && !typeCode.isEmpty()) {
                 CashFlowType cashFlowType = CashFlowType.valueOf(typeCode);
                 if(cashFlowType.isAssetIncome()) {
                     AssetIncome assetIncome = new AssetIncome();
                     assetIncome.setAsset(daybook.getAsset(row.getCell(CELL_CASH_FLOW_ASSET_TICKER).getStringCellValue()));
-                    assetIncome.setTax(getCashFlowTaxByComment(comment));
+
+                    cell = row.getCell(CELL_CASH_FLOW_TAX);
+                    if(cell != null) {
+                        cell.setCellType(Cell.CELL_TYPE_STRING);
+                        if (!cell.getStringCellValue().isEmpty())
+                            assetIncome.setTax(new BigDecimal(cell.getStringCellValue()));
+                    }
+
+                    cell = row.getCell(CELL_CASH_FLOW_EBT);
+                    cell.setCellType(Cell.CELL_TYPE_STRING);
+                    assetIncome.setVolume(new BigDecimal(cell.getStringCellValue()));
+
                     assetIncome.setStageNumber((int)row.getCell(CELL_CASH_FLOW_STAGE_NUMBER).getNumericCellValue());
                     cashFlow = assetIncome;
                 } else {
                     cashFlow = new CashFlow();
+                    cell = row.getCell(CELL_CASH_FLOW_VOLUME);
+                    cell.setCellType(Cell.CELL_TYPE_STRING);
+                    cashFlow.setVolume(new BigDecimal(cell.getStringCellValue()));
                 }
 
                 cashFlow.setCashFlowType(cashFlowType);
@@ -203,39 +221,12 @@ public class LoaderXLS {
                 Date date = row.getCell(CELL_CASH_FLOW_DATE).getDateCellValue();
                 cashFlow.setDate(date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
 
-                cell = row.getCell(CELL_CASH_FLOW_VOLUME);
-                cell.setCellType(Cell.CELL_TYPE_STRING);
-                cashFlow.setVolume(new BigDecimal(cell.getStringCellValue()));
-
                 cashFlow.setComment(comment);
 
                 daybook.addCashFlow(cashFlow);
             }
             row = sheet.getRow(++rowNum);
         }
-    }
-
-    @Deprecated
-    // TODO: Вместо этой функции нужно указывать налог явно в файле
-    public static BigDecimal getCashFlowTaxByComment(String comment) {
-        final String TEXT_FIND_TAX = "налог к удержанию";
-        int textTaxIndex = comment.indexOf(TEXT_FIND_TAX);
-        if(textTaxIndex >= 0) {
-            String taxString = comment.substring(textTaxIndex + TEXT_FIND_TAX.length() + 1);
-            taxString = taxString.substring(0, taxString.indexOf(' '));
-            return new BigDecimal(taxString);
-        }
-        if(comment.indexOf("налог не удерживается") >= 0)
-            return new BigDecimal(0);
-        // TODO: refactoring
-        /*final String TEXT_FIND_TAX2 = "налог";
-        textTaxIndex = comment.indexOf(TEXT_FIND_TAX2);
-        if(textTaxIndex >= 0) {
-            String taxString = comment.substring(textTaxIndex + TEXT_FIND_TAX2.length() + 1);
-            taxString = taxString.substring(0, taxString.indexOf(' '));
-            return new BigDecimal(taxString);
-        }*/
-        return null;
     }
 
     public HashMap<Asset, BigDecimal> getPortfolioCostMap() throws IOException {
